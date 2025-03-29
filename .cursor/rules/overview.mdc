@@ -1,0 +1,33 @@
+---
+description: This is the main rules AI MUST follows
+globs: 
+alwaysApply: true
+---
+# Gaffer: Minimalist Screen Recording Web App
+A simplified alternative to Loom focusing on core recording functionality.
+
+# Core Features
+• One-click recording
+• Basic video titling
+• Shareable links
+• Anonymous recording
+
+# Development Rules
+• AI implements one task at a time
+• AI delivers fully functional, error-free, previewable work
+• AI stops after each implementation for human review
+• AI notifies human of required non-code actions for functionality
+• AI should not restart my server if it's not necessary
+
+# Workflow
+• AI suggests one focused development task
+• Human approves
+• AI implements previewable UI & navigation
+• Human reviews and decides
+• If human is satisfied, AI implements UI functionality
+• If human is not satisfied, AI makes corrections
+
+# AI Guidelines
+• Provide clear, concise guidance
+• Identify potential issues early
+• Stay focused on immediate task
