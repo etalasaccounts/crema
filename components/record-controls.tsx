@@ -171,7 +171,7 @@ export function RecordControls() {
   const handleStopRecording = async () => {
     // Capture the recording time before stopping the timer
     const finalRecordingTime = recordingTime;
-    
+
     // Stop the timer first
     stopTimer();
 
@@ -180,7 +180,9 @@ export function RecordControls() {
 
     // Explicitly stop the screen stream to remove browser's screen sharing UI
     if (mediaStreamManager.screenStream) {
-      mediaStreamManager.screenStream.getTracks().forEach(track => track.stop());
+      mediaStreamManager.screenStream
+        .getTracks()
+        .forEach((track) => track.stop());
       mediaStreamManager.setScreenStream(null);
     }
 
@@ -265,10 +267,7 @@ export function RecordControls() {
     <div className="fixed inset-0 z-[9999]" style={{ pointerEvents: "none" }}>
       <Rnd
         default={{
-          x:
-            typeof window !== "undefined"
-              ? window.innerWidth - (cameraActive ? 360 : 200)
-              : 0,
+          x: 20,
           y: typeof window !== "undefined" ? window.innerHeight - 200 : 0,
           width: cameraActive ? 360 : 200,
           height: cameraActive ? 180 : 60,
@@ -307,7 +306,7 @@ export function RecordControls() {
 
           <div
             id="control-bar"
-            className="flex items-center justify-center gap-2 h-fit bg-black/90 backdrop-blur-sm border border-white/20 rounded-full shadow-lg px-4 py-3"
+            className="flex items-center justify-center gap-2 h-fit backdrop-blur-sm dark:bg-black dark:border-white/[0.15] bg-gradient-to-b from-neutral-800 to-neutral-950 shadow-[0_1px_2px_#00000045,0_0_#000,inset_1px_1px_#ffffff5,inset_0_2px_1px_#ffffff50] rounded-full px-4 py-3"
             style={{ touchAction: "none" }}
           >
             {/* Record/Stop button */}

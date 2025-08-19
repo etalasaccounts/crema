@@ -1,6 +1,9 @@
 // Hooks & Next
 import Link from "next/link";
 
+// Force dynamic rendering for this page since it uses cookies
+export const dynamic = 'force-dynamic';
+
 // Components
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -8,6 +11,7 @@ import { VideoThumbnail } from "@/components/video-thumbnail";
 import { Ellipsis } from "lucide-react";
 import { getUserInitials } from "@/lib/user-utils";
 import { db } from "@/lib/db";
+import { getCurrentUserWorkspaceId } from "@/lib/server-auth";
 
 interface VideoData {
   id: string;
@@ -30,7 +34,18 @@ interface VideoData {
 
 async function getVideos(): Promise<VideoData[]> {
   try {
+    // Get current user's active workspace
+    const activeWorkspaceId = await getCurrentUserWorkspaceId();
+    
+    // If no active workspace, return empty array
+    if (!activeWorkspaceId) {
+      return [];
+    }
+
     const videos = await db.video.findMany({
+      where: {
+        workspaceId: activeWorkspaceId,
+      },
       include: {
         user: {
           select: {
@@ -47,10 +62,10 @@ async function getVideos(): Promise<VideoData[]> {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
-    
+
     return videos;
   } catch (error) {
     console.error("Error fetching videos:", error);
@@ -61,24 +76,24 @@ async function getVideos(): Promise<VideoData[]> {
 function formatTimeAgo(date: Date): string {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
+
   if (diffInSeconds < 60) {
     return "few seconds ago";
   } else if (diffInSeconds < 3600) {
     const minutes = Math.floor(diffInSeconds / 60);
-    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
   } else if (diffInSeconds < 86400) {
     const hours = Math.floor(diffInSeconds / 3600);
-    return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
   } else {
     const days = Math.floor(diffInSeconds / 86400);
-    return `${days} day${days > 1 ? 's' : ''} ago`;
+    return `${days} day${days > 1 ? "s" : ""} ago`;
   }
 }
 
 async function VideoList() {
   const videos = await getVideos();
-  
+
   if (videos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
@@ -126,7 +141,9 @@ async function VideoList() {
                 <p className="text-sm text-muted-foreground">
                   {video.user.name || "Unknown User"}
                 </p>
-                <p className="text-sm text-muted-foreground">{formatTimeAgo(video.createdAt)}</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatTimeAgo(video.createdAt)}
+                </p>
               </div>
             </div>
           </div>

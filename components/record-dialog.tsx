@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -208,7 +209,7 @@ export function RecordDialog({
         />
 
         <DialogContent
-          className="sm:max-w-80 fixed left-4 top-4 translate-x-0 translate-y-0 z-[50]"
+          className="sm:max-w-80 fixed dark:bg-black dark:border-white/[0.15] bg-gradient-to-b from-neutral-800 to-neutral-950 shadow-[0_1px_2px_#00000045,0_0_#000,inset_1px_1px_#ffffff5,inset_0_2px_1px_#ffffff50] left-auto right-4 top-4 translate-x-0 translate-y-0 z-[50]"
           onPointerDownOutside={(e) => {
             // Prevent closing the dialog when clicking on any record control elements
             const target = e.target as HTMLElement;
@@ -218,7 +219,17 @@ export function RecordDialog({
           }}
         >
           <DialogHeader>
-            <DialogTitle className="text-white text-3xl">crema</DialogTitle>
+            <DialogTitle>
+              <div className="flex gap-2 w-fit items-center">
+                <Image
+                  src={"/assets/crema-logo.svg"}
+                  alt="logo"
+                  width={28}
+                  height={28}
+                />{" "}
+                <p className="text-xl font-medium text-white">Crema</p>
+              </div>
+            </DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-4 py-4">
