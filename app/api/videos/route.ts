@@ -15,13 +15,16 @@ const createVideoSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+    console.log("Received video creation request body:", body);
+
     // Validate the request body
     const validatedData = createVideoSchema.parse(body);
-    
+    console.log("Validated data:", validatedData);
+    console.log("Duration value:", validatedData.duration);
+
     // Generate title if not provided
     const title = validatedData.title || generateVideoTitleWithTimestamp();
-    
+
     // Create the video record in the database
     const video = await db.video.create({
       data: {
@@ -47,14 +50,14 @@ export async function POST(request: NextRequest) {
         },
       },
     });
-    
+
     return NextResponse.json({
       success: true,
       video,
     });
   } catch (error) {
     console.error("Error creating video:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
@@ -65,7 +68,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       {
         success: false,

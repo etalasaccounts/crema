@@ -72,6 +72,8 @@ class MediaStreamManager extends EventEmitter {
       if (videoTrack) {
         videoTrack.addEventListener('ended', () => {
           this.setScreenStream(null);
+          // Emit without recordingTime when browser stops sharing
+          // The listener will need to get the time from the recording component
           this.emit('screenSharingEnded');
         });
       }
@@ -100,4 +102,4 @@ class MediaStreamManager extends EventEmitter {
 }
 
 // Export the singleton instance
-export const mediaStreamManager = MediaStreamManager.getInstance(); 
+export const mediaStreamManager = MediaStreamManager.getInstance();

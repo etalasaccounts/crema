@@ -169,6 +169,9 @@ export function RecordControls() {
 
   // Handle stopping recording and saving
   const handleStopRecording = async () => {
+    // Capture the recording time before stopping the timer
+    const finalRecordingTime = recordingTime;
+    
     // Stop the timer first
     stopTimer();
 
@@ -177,10 +180,10 @@ export function RecordControls() {
 
     // Trigger the same event that browser 'Stop sharing' triggers
     // This ensures consistent behavior between custom stop button and browser stop
-    mediaStreamManager.emit("screenSharingEnded");
+    mediaStreamManager.emit("screenSharingEnded", finalRecordingTime);
 
-    // Use the centralized function to stop recording
-    const result = await stopRecordingProcess();
+    // Use the centralized function to stop recording, passing the timer duration
+    const result = await stopRecordingProcess(finalRecordingTime);
     console.log("Stop recording result:", result);
   };
 

@@ -7,7 +7,7 @@ export async function POST(
 ) {
   try {
     const { id } = params;
-    
+
     // Validate that ID is provided
     if (!id) {
       return NextResponse.json(
@@ -18,7 +18,7 @@ export async function POST(
         { status: 400 }
       );
     }
-    
+
     // Check if video exists and increment views
     const video = await db.video.update({
       where: {
@@ -34,16 +34,21 @@ export async function POST(
         views: true,
       },
     });
-    
+
     return NextResponse.json({
       success: true,
       views: video.views,
     });
   } catch (error) {
     console.error("Error incrementing video views:", error);
-    
+
     // Check if it's a record not found error
-    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2025"
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -52,7 +57,7 @@ export async function POST(
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(
       {
         success: false,

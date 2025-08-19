@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = params;
-    
+
     // Validate that ID is provided
     if (!id) {
       return NextResponse.json(
@@ -18,7 +18,7 @@ export async function GET(
         { status: 400 }
       );
     }
-    
+
     // Fetch the video from the database
     const video = await db.video.findUnique({
       where: {
@@ -40,7 +40,7 @@ export async function GET(
         },
       },
     });
-    
+
     // Check if video exists
     if (!video) {
       return NextResponse.json(
@@ -51,14 +51,14 @@ export async function GET(
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json({
       success: true,
       video,
     });
   } catch (error) {
     console.error("Error fetching video:", error);
-    
+
     return NextResponse.json(
       {
         success: false,

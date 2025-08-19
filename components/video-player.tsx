@@ -54,7 +54,11 @@ export function VideoPlayer({
       const videoDuration = providedDuration && providedDuration > 0 
         ? providedDuration 
         : videoRef.current.duration;
-      setDuration(videoDuration);
+      
+      // Only set duration if it's a valid number
+      if (videoDuration && !isNaN(videoDuration) && isFinite(videoDuration)) {
+        setDuration(videoDuration);
+      }
     }
   };
 
@@ -162,6 +166,10 @@ export function VideoPlayer({
 
   // Format time (MM:SS)
   const formatTime = (timeInSeconds: number): string => {
+    // Handle NaN, undefined, null, or invalid values
+    if (!timeInSeconds || isNaN(timeInSeconds) || !isFinite(timeInSeconds)) {
+      return "00:00";
+    }
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes.toString().padStart(2, "0")}:${seconds
@@ -268,7 +276,7 @@ export function VideoPlayer({
           <Slider
             value={[currentTime]}
             min={0}
-            max={duration || 100}
+            max={duration && duration > 0 ? duration : 100}
             step={0.01}
             onValueChange={handleSeek}
             className="w-full"
