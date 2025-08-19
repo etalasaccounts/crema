@@ -5,7 +5,9 @@ import { Prisma } from "@/lib/generated/prisma";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/google/callback`;
+const GOOGLE_REDIRECT_URI = `${
+  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+}/api/auth/google/callback`;
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 const JWT_EXPIRES_IN = "7d";
 
@@ -32,56 +34,66 @@ interface GoogleUserInfo {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
-    const error = searchParams.get('error');
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    const error = searchParams.get("error");
 
     // Check for OAuth errors
     if (error) {
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=oauth_error`
+        `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/login?error=oauth_error`
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=missing_code`
+        `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/login?error=missing_code`
       );
     }
 
     // Verify state parameter for CSRF protection
-    const storedState = request.cookies.get('oauth_state')?.value;
+    const storedState = request.cookies.get("oauth_state")?.value;
     if (!storedState || storedState !== state) {
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=invalid_state`
+        `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/login?error=invalid_state`
       );
     }
 
     if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=oauth_config`
+        `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/login?error=oauth_config`
       );
     }
 
     // Exchange authorization code for access token
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
         client_id: GOOGLE_CLIENT_ID,
         client_secret: GOOGLE_CLIENT_SECRET,
         code,
-        grant_type: 'authorization_code',
+        grant_type: "authorization_code",
         redirect_uri: GOOGLE_REDIRECT_URI,
       }),
     });
 
     if (!tokenResponse.ok) {
-      console.error('Token exchange failed:', await tokenResponse.text());
+      console.error("Token exchange failed:", await tokenResponse.text());
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=token_exchange`
+        `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/login?error=token_exchange`
       );
     }
 
@@ -93,9 +105,11 @@ export async function GET(request: NextRequest) {
     );
 
     if (!userResponse.ok) {
-      console.error('Failed to fetch user info:', await userResponse.text());
+      console.error("Failed to fetch user info:", await userResponse.text());
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=user_info`
+        `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/login?error=user_info`
       );
     }
 
@@ -103,7 +117,9 @@ export async function GET(request: NextRequest) {
 
     if (!googleUser.verified_email) {
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=unverified_email`
+        `${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/login?error=unverified_email`
       );
     }
 
@@ -127,8 +143,8 @@ export async function GET(request: NextRequest) {
           data: {
             name: googleUser.name,
             email: googleUser.email,
-            password: '', // No password for OAuth users
-            phone: '', // Default empty phone
+            password: "", // No password for OAuth users
+            phone: "", // Default empty phone
           },
           select: {
             id: true,
@@ -141,7 +157,7 @@ export async function GET(request: NextRequest) {
         // Create default 'Personal' workspace
         const workspace = await tx.workspace.create({
           data: {
-            name: 'Personal',
+            name: "Personal",
             userId: newUser.id,
           },
         });
@@ -177,36 +193,42 @@ export async function GET(request: NextRequest) {
 
     // Create response with redirect to home
     const response = NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/home?auth=success`
+      `${
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+      }/home?auth=success`
     );
 
     // Set HTTP-only cookie
-    response.cookies.set('auth-token', token, {
+    response.cookies.set("auth-token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
-      path: '/',
+      path: "/",
     });
 
     // Clear the OAuth state cookie
-    response.cookies.delete('oauth_state');
+    response.cookies.delete("oauth_state");
 
     return response;
   } catch (error) {
-    console.error('Google OAuth callback error:', error);
-    
+    console.error("Google OAuth callback error:", error);
+
     // Handle Prisma errors
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
+      if (error.code === "P2002") {
         return NextResponse.redirect(
-          `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=email_exists`
+          `${
+            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+          }/login?error=email_exists`
         );
       }
     }
 
     return NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/login?error=oauth_callback`
+      `${
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+      }/login?error=oauth_callback`
     );
   }
 }

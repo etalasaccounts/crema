@@ -12,6 +12,47 @@ const createVideoSchema = z.object({
   duration: z.number().positive("Duration must be positive").optional(),
 });
 
+export async function GET() {
+  try {
+    // Fetch all videos from the database
+    const videos = await db.video.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        workspace: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      videos,
+    });
+  } catch (error) {
+    console.error("Error fetching videos:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to fetch videos",
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

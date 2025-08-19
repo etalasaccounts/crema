@@ -75,6 +75,13 @@ export async function POST(request: NextRequest) {
 
     const { user } = result;
 
+    // Map activeWorkspaceId to active_workspace for frontend compatibility
+    const { activeWorkspaceId, ...userWithoutWorkspaceId } = user;
+    const userResponse = {
+      ...userWithoutWorkspaceId,
+      active_workspace: activeWorkspaceId || '',
+    };
+
     // Create JWT token for auto-login
     const token = jwt.sign(
       { 
@@ -89,7 +96,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json(
       {
         message: "User created successfully",
-        user,
+        user: userResponse,
         token,
       },
       { status: 201 }

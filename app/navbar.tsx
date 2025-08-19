@@ -75,7 +75,7 @@ function Navbar({ className }: { className?: string }) {
                       <h4 className="font-medium text-sm leading-none">
                         {user.name}
                       </h4>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground truncate">
                         {user.email}
                       </p>
                     </div>

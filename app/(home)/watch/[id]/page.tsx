@@ -14,7 +14,7 @@ interface VideoData {
   updatedAt: Date;
   user: {
     id: string;
-    name: string;
+    name: string | null;
     email: string;
   };
   workspace: {
@@ -62,7 +62,7 @@ export default async function page({ params }: { params: Promise<{ id: string }>
     title: video.title,
     video_url: video.videoUrl,
     user: {
-      name: video.user.name,
+      name: video.user.name || "Unknown User",
     },
     workspace: video.workspace.name,
     views: video.views || 0,

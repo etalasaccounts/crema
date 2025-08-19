@@ -1,4 +1,5 @@
 import LoginForm from "@/app/(auth)/login-form";
+import { Suspense } from "react";
 
 export default async function AuthPage() {
   return (
@@ -6,7 +7,9 @@ export default async function AuthPage() {
       <div className="text-4xl font-semibold text-center tracking-tighter mb-10">
         Log in to Crema
       </div>
-      <LoginForm />
+      <Suspense fallback={<div>Loading...</div>}>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }

@@ -25,10 +25,19 @@ export async function POST(request: NextRequest) {
         email: true,
         password: true,
         createdAt: true,
+        activeWorkspaceId: true,
       },
     });
 
     if (!user) {
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 }
+      );
+    }
+
+    // Check if user has a password (OAuth users might not have one)
+    if (!user.password) {
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
@@ -55,14 +64,18 @@ export async function POST(request: NextRequest) {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
+    // Remove password from response and map activeWorkspaceId to active_workspace
+    const { password: _, activeWorkspaceId, ...userWithoutPassword } = user;
+    const userResponse = {
+      ...userWithoutPassword,
+      active_workspace: activeWorkspaceId || '',
+    };
 
     // Create response
     const response = NextResponse.json(
       {
         message: "Login successful",
-        user: userWithoutPassword,
+        user: userResponse,
         token,
       },
       { status: 200 }

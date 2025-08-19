@@ -116,9 +116,28 @@ export const useOAuthHandler = () => {
     const error = searchParams.get('error');
 
     if (authStatus === 'success') {
-      toast.success('Successfully logged in with Google!');
-      // Clear the URL parameters
-      router.replace('/home');
+      // Fetch user data from the me endpoint
+      fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include',
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.user) {
+            // Set user data in auth context
+            login(data.user);
+            toast.success('Successfully logged in with Google!');
+          } else {
+            toast.error('Failed to fetch user data');
+          }
+        })
+        .catch(() => {
+          toast.error('Failed to fetch user data');
+        })
+        .finally(() => {
+          // Clear the URL parameters
+          router.replace('/home');
+        });
     } else if (error) {
       // Handle different OAuth error types
       const errorMessages: Record<string, string> = {
