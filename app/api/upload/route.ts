@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// This should be set in your environment variables
-const BUNNY_API_KEY = process.env.BUNNY_API_KEY || "";
-const BUNNY_STORAGE_ZONE = process.env.BUNNY_STORAGE_ZONE || "";
-const BUNNY_STORAGE_REGION = process.env.BUNNY_STORAGE_REGION || "";
+// Bunny.net Storage Configuration
+const BUNNY_STORAGE_PASSWORD = process.env.BUNNY_STORAGE_PASSWORD || "";
+const BUNNY_STORAGE_ZONE_NAME = process.env.BUNNY_STORAGE_ZONE_NAME || "crema";
+const BUNNY_STORAGE_HOSTNAME = process.env.BUNNY_STORAGE_HOSTNAME || "sg.storage.bunnycdn.com";
+const BUNNY_CDN_HOSTNAME = process.env.BUNNY_CDN_HOSTNAME || "crema.b-cdn.net";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("Starting upload to Bunny.net with new authentication method");
-    
-    // Make sure the API key is defined
-    if (!BUNNY_API_KEY || !BUNNY_STORAGE_ZONE) {
-      console.error("Missing Bunny.net configuration");
+    // Make sure the storage password is defined
+    if (!BUNNY_STORAGE_PASSWORD || !BUNNY_STORAGE_ZONE_NAME) {
+      console.error("Missing Bunny.net storage configuration");
       return NextResponse.json({ 
         success: false, 
-        error: "Bunny.net configuration is missing" 
+        error: "Bunny.net storage configuration is missing" 
       }, { status: 500 });
     }
 
@@ -34,32 +33,26 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 10);
     const filename = `gaffer-${timestamp}-${random}.webm`;
-    console.log("Generated filename:", filename);
+
     
     // Read the file as an array buffer
     const buffer = await videoBlob.arrayBuffer();
-    console.log("Video size:", buffer.byteLength, "bytes");
 
-    // Create a storage URL - directly upload to the storage zone
-    // Using their direct regional storage URL format
-    const apiEndpoint = BUNNY_STORAGE_REGION.includes('.')
-      ? `https://${BUNNY_STORAGE_REGION}`
-      : 'https://storage.bunnycdn.com';
-    
-    const storageUrl = `${apiEndpoint}/${BUNNY_STORAGE_ZONE}/${filename}`;
-    console.log("Using storage URL:", storageUrl);
+
+    // Create a storage URL using the correct Bunny.net format
+    const storageUrl = `https://${BUNNY_STORAGE_HOSTNAME}/${BUNNY_STORAGE_ZONE_NAME}/${filename}`;
+
 
     // Upload to Bunny.net Storage
     try {
-      console.log("Uploading to Bunny.net with API key length:", BUNNY_API_KEY.length);
-      
+
       // Create a buffer from the array buffer for the request body
       const arrayBufferView = new Uint8Array(buffer);
       
       const response = await fetch(storageUrl, {
         method: "PUT",
         headers: {
-          "AccessKey": BUNNY_API_KEY.trim(),
+          "AccessKey": BUNNY_STORAGE_PASSWORD.trim(),
           "Content-Type": "video/webm",
           "Accept": "application/json"
         },
@@ -74,15 +67,15 @@ export async function POST(request: NextRequest) {
         responseText = "Could not read response body";
       }
       
-      console.log("Response status:", response.status);
-      console.log("Response details:", responseText);
+
+
       
       // Log all the response headers for debugging
       const headers: Record<string, string> = {};
       response.headers.forEach((value, key) => {
         headers[key] = value;
       });
-      console.log("Response headers:", headers);
+
       
       if (!response.ok) {
         console.error("Upload failed with status:", response.status);
@@ -94,17 +87,36 @@ export async function POST(request: NextRequest) {
         }, { status: 500 });
       }
       
-      // Create a shareable URL for the uploaded video
-      // Let's try a direct URL to the storage for now to debug
-      const directStorageUrl = `https://${BUNNY_STORAGE_ZONE}.b-cdn.net/${filename}`;
-      console.log("Generated shareable URL:", directStorageUrl);
+      // First try to get the URL from the response if available
+      let directStorageUrl;
+      
+      // Check if Bunny's response includes the final URL (in response body or headers)
+      // Some CDNs provide this information
+      if (responseText && typeof responseText === 'string' && responseText.includes('url')) {
+        try {
+          const responseData = JSON.parse(responseText);
+          if (responseData.url) {
+            directStorageUrl = responseData.url;
+          }
+        } catch (e) {
+          // If parsing fails, continue to fallback
+          console.log("Could not parse response as JSON");
+        }
+      }
+      
+      // If no URL was found in the response, use the CDN URL
+      if (!directStorageUrl) {
+        // Use the CDN hostname for public access
+        directStorageUrl = `https://${BUNNY_CDN_HOSTNAME}/${filename}`;
+      }
+      
+      console.log("Using URL for video:", directStorageUrl);
       
       // Return successful response with URL
       return NextResponse.json({ 
         success: true, 
         url: directStorageUrl,
-        storageUrl: storageUrl, // Include for debugging
-        apiKey: `${BUNNY_API_KEY.substring(0, 5)}...` // Just show first 5 chars for security
+        storageUrl: storageUrl
       });
       
     } catch (uploadError) {
@@ -124,4 +136,4 @@ export async function POST(request: NextRequest) {
       details: error instanceof Error ? error.message : String(error)
     }, { status: 500 });
   }
-} 
+}

@@ -6,7 +6,7 @@ alwaysApply: false
 
 Naming Conventions:  
 
-- Use lowercase with kebab-case for folders & files: (e.g., user-card.tsx). 
+- Use lowercase with kebab-case for folders & components: (e.g., user-card.tsx). 
 - Use kebab-case in API routes (e.g., /api/get-user). 
 - Use use prefix and camelCase for custom hooks (e.g., useAuth), store in hooks/. 
 - Use camelCase for utility functions, store in utils/ or lib/ (e.g., formatDate.ts). 

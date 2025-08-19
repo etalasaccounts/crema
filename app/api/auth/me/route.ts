@@ -1,0 +1,100 @@
+import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import { db } from "@/lib/db";
+import { Prisma } from "@/lib/generated/prisma";
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+
+interface JWTPayload {
+  userId: string;
+  email: string;
+  iat: number;
+  exp: number;
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    // Get token from HTTP-only cookie
+    const token = request.cookies.get("auth-token")?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { error: "No authentication token found" },
+        { status: 401 }
+      );
+    }
+
+    // Verify and decode JWT token
+    let decoded: JWTPayload;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    } catch (jwtError) {
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+
+    // Fetch current user data from database
+    const user = await db.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+        activeWorkspaceId: true,
+        workspaces: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Format user data to match UserContextInterface
+    const userData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      active_workspace: user.activeWorkspaceId || "",
+      phone: user.phone,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    return NextResponse.json(
+      {
+        user: userData,
+        isAuthenticated: true,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Get current user error:", error);
+
+    // Handle Prisma errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return NextResponse.json(
+        { error: "Database error" },
+        { status: 500 }
+      );
+    }
+
+    // Generic error
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
