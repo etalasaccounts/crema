@@ -222,12 +222,11 @@ export function RecordDialog({
             <DialogTitle>
               <div className="flex gap-2 w-fit items-center">
                 <Image
-                  src={"/assets/crema-logo.svg"}
+                  src={"/assets/crema-logo-negative.png"}
                   alt="logo"
-                  width={28}
-                  height={28}
-                />{" "}
-                <p className="text-xl font-medium text-white">Crema</p>
+                  width={80}
+                  height={10}
+                />
               </div>
             </DialogTitle>
           </DialogHeader>

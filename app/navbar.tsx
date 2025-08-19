@@ -47,12 +47,11 @@ function Navbar({ className }: { className?: string }) {
         <div className="flex gap-2 w-fit items-center">
           {" "}
           <Image
-            src={"/assets/crema-logo.svg"}
+            src={"/assets/crema-logo-negative.png"}
             alt="logo"
-            width={28}
+            width={114}
             height={28}
           />{" "}
-          <p className="text-xl font-medium text-white">Crema</p>
         </div>
         <div className="flex gap-3 w-full justify-end">
           {isLoading ? (

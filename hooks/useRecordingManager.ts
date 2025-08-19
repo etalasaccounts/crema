@@ -1,27 +1,22 @@
-import { useCallback, useRef, useEffect, useState } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   setCountdownState,
   setRecording,
-  setCameraActive,
-  setMicActive,
   setStandby,
 } from "@/store/slices/mediaSlice";
 import { useMediaRedux } from "@/hooks/use-media-redux";
 import { toast } from "sonner";
 import { useScreenRecording } from "@/hooks/useScreenRecording";
 import { mediaStreamManager } from "@/lib/services/MediaStreamManager";
-// TEMPORARILY DISABLED - FOCUSING ON BUNNY CDN ONLY
-// import { createVideoRecord, storeAnonymousVideo, updateVideoUrl } from '@/lib/supabase/videos';
 import { uploadVideoToBunny } from "@/lib/upload-video";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 export function useRecordingManager() {
   const dispatch = useAppDispatch();
-  const { isRecording, countdownState, isCountdownPaused } = useAppSelector(
-    (state) => state.media
-  );
+  const { isRecording, countdownState, isCountdownPaused, cameraActive } =
+    useAppSelector((state) => state.media);
   const { user } = useCurrentUser();
   const router = useRouter();
 
@@ -30,10 +25,10 @@ export function useRecordingManager() {
     stopRecording,
     resumeRecording,
     pauseRecording,
-    isRecording: isScreenRecording,
     isPaused,
-    recordedBlob,
   } = useScreenRecording();
+
+  const { deactivateCamera } = useMediaRedux();
 
   const countdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -136,60 +131,74 @@ export function useRecordingManager() {
   );
 
   // Stop recording process
-  const stopRecordingProcess = useCallback(async (recordingDuration?: number) => {
-    console.log("stopRecordingProcess called, isRecording:", isRecording);
+  const stopRecordingProcess = useCallback(
+    async (recordingDuration?: number) => {
+      console.log("stopRecordingProcess called, isRecording:", isRecording);
 
-    if (!isRecording) {
-      return false;
-    }
+      if (!isRecording) {
+        return false;
+      }
 
-    try {
-      // Stop the recording and get the blob
+      try {
+        // Stop the recording and get the blob
 
-      const blob = await stopRecording();
+        const blob = await stopRecording();
 
-      if (blob && user) {
-        console.log("Recording stopped, blob size:", blob.size);
-        console.log("Recording duration from timer:", recordingDuration, "seconds");
+        if (blob && user) {
+          console.log("Recording stopped, blob size:", blob.size);
+          console.log(
+            "Recording duration from timer:",
+            recordingDuration,
+            "seconds"
+          );
 
-        // Reset recording state
-        dispatch(setRecording(false));
-        dispatch(setCountdownState("inactive"));
-        dispatch(setStandby(false));
+          // Reset recording state
+          dispatch(setRecording(false));
+          dispatch(setCountdownState("inactive"));
+          dispatch(setStandby(false));
 
-        // Use the timer duration instead of extracting from blob
-        const duration = recordingDuration && recordingDuration > 0 ? recordingDuration : 0;
-        console.log("Duration being used for video creation:", duration);
-        console.log("Original recordingDuration parameter:", recordingDuration);
+          // Deactivate camera to ensure it's properly stopped
+          if (cameraActive) {
+            deactivateCamera();
+          }
 
-        // Show a loading toast for the upload process
-        const uploadToast = toast.loading("Uploading video to Bunny CDN...");
+          // Use the timer duration instead of extracting from blob
+          const duration =
+            recordingDuration && recordingDuration > 0 ? recordingDuration : 0;
+          console.log("Duration being used for video creation:", duration);
+          console.log(
+            "Original recordingDuration parameter:",
+            recordingDuration
+          );
 
-        uploadVideoToBunny(blob)
-          .then(async (videoUrl) => {
-            if (videoUrl && user) {
-              console.log("Video URL from Bunny:", videoUrl);
-              console.log("Video duration:", duration, "seconds");
-              toast.dismiss(uploadToast);
+          // Show a loading toast for the upload process
+          const uploadToast = toast.loading("Uploading video to Bunny CDN...");
 
-              // Create video record in database
-              const createVideoToast = toast.loading(
-                "Creating video record..."
-              );
+          uploadVideoToBunny(blob)
+            .then(async (videoUrl) => {
+              if (videoUrl && user) {
+                console.log("Video URL from Bunny:", videoUrl);
+                console.log("Video duration:", duration, "seconds");
+                toast.dismiss(uploadToast);
 
-              try {
-                const response = await fetch("/api/videos", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    videoUrl,
-                    userId: user.id,
-                    workspaceId: user.active_workspace,
-                    duration: duration > 0 ? duration : undefined,
-                  }),
-                });
+                // Create video record in database
+                const createVideoToast = toast.loading(
+                  "Creating video record..."
+                );
+
+                try {
+                  const response = await fetch("/api/videos", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      videoUrl,
+                      userId: user.id,
+                      workspaceId: user.active_workspace,
+                      duration: duration > 0 ? duration : undefined,
+                    }),
+                  });
 
                   const data = await response.json();
 
@@ -267,28 +276,30 @@ export function useRecordingManager() {
               toast.success("Recording saved locally as fallback");
             });
 
+          return true;
+        }
+
+        // Reset state
+        dispatch(setRecording(false));
+        dispatch(setCountdownState("inactive"));
+        dispatch(setStandby(false));
         return true;
+      } catch (error: unknown) {
+        console.error(
+          "Error stopping recording:",
+          error instanceof Error ? error.message : String(error)
+        );
+        toast.error("Error saving recording");
+
+        // Reset state on error
+        dispatch(setRecording(false));
+        dispatch(setCountdownState("inactive"));
+        dispatch(setStandby(false));
+        return false;
       }
-
-      // Reset state
-      dispatch(setRecording(false));
-      dispatch(setCountdownState("inactive"));
-      dispatch(setStandby(false));
-      return true;
-    } catch (error: unknown) {
-      console.error(
-        "Error stopping recording:",
-        error instanceof Error ? error.message : String(error)
-      );
-      toast.error("Error saving recording");
-
-      // Reset state on error
-      dispatch(setRecording(false));
-      dispatch(setCountdownState("inactive"));
-      dispatch(setStandby(false));
-      return false;
-    }
-  }, [isRecording, stopRecording, dispatch, user, router]);
+    },
+    [isRecording, stopRecording, dispatch, user, router]
+  );
 
   const togglePauseRecording = useCallback(async () => {
     if (!isRecording) {

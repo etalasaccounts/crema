@@ -15,7 +15,7 @@ import { loginSchema, LoginInput } from "@/schemas/auth";
 export default function LoginForm() {
   const login = useLogin();
   const { initiateGoogleAuth } = useGoogleAuth();
-  
+
   // Handle OAuth results
   useOAuthHandler();
 
@@ -62,7 +62,6 @@ export default function LoginForm() {
         className="w-full h-12 rounded-2xl text-base"
         type="submit"
         disabled={login.isPending}
-        loading={login.isPending}
       >
         {login.isPending ? "Logging in..." : "Continue with Email"}
       </Button>

@@ -186,6 +186,11 @@ export function RecordControls() {
       mediaStreamManager.setScreenStream(null);
     }
 
+    // Deactivate camera to ensure it's properly stopped
+    if (cameraActive) {
+      deactivateCamera();
+    }
+
     // Trigger the same event that browser 'Stop sharing' triggers
     // This ensures consistent behavior between custom stop button and browser stop
     mediaStreamManager.emit("screenSharingEnded", finalRecordingTime);
@@ -246,6 +251,11 @@ export function RecordControls() {
           .getTracks()
           .forEach((track) => track.stop());
         mediaStreamManager.setScreenStream(null);
+      }
+
+      // Deactivate camera to ensure it's properly stopped
+      if (cameraActive) {
+        deactivateCamera();
       }
 
       // Clear countdown timeouts
