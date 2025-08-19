@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { getUserInitials } from "@/lib/user-utils";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 export function NavbarDemo() {
   return (
@@ -27,6 +28,12 @@ export function NavbarDemo() {
 function Navbar({ className }: { className?: string }) {
   const [active, setActive] = useState<string | null>(null);
   const { user, isLoading, logout } = useCurrentUser();
+
+  const router = useRouter();
+
+  const handleLogin = () => {
+    router.push("/login");
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -48,13 +55,13 @@ function Navbar({ className }: { className?: string }) {
           <p className="text-xl font-medium text-white">Crema</p>
         </div>
         <div className="flex gap-3 w-full justify-end">
-          <div className="flex gap-1 w-fit justify-end">
-            {isLoading ? (
-              <div className="flex gap-2 items-center">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-10 w-10 rounded-full" />
-              </div>
-            ) : user ? (
+          {isLoading ? (
+            <div className="flex gap-2 items-center">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-10 w-10 rounded-full" />
+            </div>
+          ) : user ? (
+            <div className="flex gap-1 w-fit justify-end">
               <Popover>
                 <PopoverTrigger asChild>
                   <div className="flex gap-2 items-center w-fit">
@@ -99,17 +106,18 @@ function Navbar({ className }: { className?: string }) {
                   </div>
                 </PopoverContent>
               </Popover>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={() => (window.location.href = "/login")}
-              >
-                Login
-              </Button>
-            )}
-          </div>{" "}
-          <RecordButton />
-        </div>
+              <RecordButton />
+            </div>
+          ) : (
+            <Button
+              variant="secondary"
+              className="bg-neutral-600 text-white text-lg"
+              onClick={handleLogin}
+            >
+              Login
+            </Button>
+          )}
+        </div>{" "}
       </Menu>
     </div>
   );

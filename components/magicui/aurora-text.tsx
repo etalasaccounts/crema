@@ -13,7 +13,7 @@ interface AuroraTextProps {
 export function AuroraText({
   children,
   className = "",
-  colors = ["#ff0000", "#00ff00", "#ff0000", "#ff0000", "#0000ff", "#0000ff"],
+  colors = ["#ff0000", "#ff5500", "#ff0000", "#ff5500", "#ff0000", "#ff5500"],
   speed = 1,
 }: AuroraTextProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
