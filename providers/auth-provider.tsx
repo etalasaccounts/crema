@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const storedUser = localStorage.getItem("user");
         const storedToken = localStorage.getItem("token");
-        
+
         if (storedUser && storedToken) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
@@ -88,11 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { SignUpInput, LoginInput } from "@/schemas/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
+import { useEffect } from "react";
 
 // API functions
 const signupUser = async (data: SignUpInput) => {
@@ -102,4 +103,50 @@ export const useLogout = () => {
       router.push("/login");
     },
   });
+};
+
+// Hook for handling OAuth authentication results
+export const useOAuthHandler = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { login } = useAuth();
+
+  useEffect(() => {
+    const authStatus = searchParams.get('auth');
+    const error = searchParams.get('error');
+
+    if (authStatus === 'success') {
+      toast.success('Successfully logged in with Google!');
+      // Clear the URL parameters
+      router.replace('/home');
+    } else if (error) {
+      // Handle different OAuth error types
+      const errorMessages: Record<string, string> = {
+        oauth_error: 'OAuth authentication failed',
+        missing_code: 'Authentication code missing',
+        invalid_state: 'Invalid authentication state',
+        oauth_config: 'OAuth configuration error',
+        token_exchange: 'Failed to exchange authorization code',
+        user_info: 'Failed to retrieve user information',
+        unverified_email: 'Email address is not verified with Google',
+        email_exists: 'An account with this email already exists',
+        oauth_callback: 'OAuth callback error'
+      };
+
+      const errorMessage = errorMessages[error] || 'Authentication failed';
+      toast.error(errorMessage);
+      
+      // Clear the error from URL
+      router.replace('/login');
+    }
+  }, [searchParams, router, login]);
+};
+
+// Hook for initiating Google OAuth
+export const useGoogleAuth = () => {
+  const initiateGoogleAuth = () => {
+    window.location.href = '/api/auth/google';
+  };
+
+  return { initiateGoogleAuth };
 };

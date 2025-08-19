@@ -2,7 +2,7 @@
 
 // Hooks & Next
 import { useForm } from "react-hook-form";
-import { useSignup } from "@/hooks/use-auth";
+import { useSignup, useGoogleAuth, useOAuthHandler } from "@/hooks/use-auth";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,10 @@ import { signUpSchema, SignUpInput } from "@/schemas/auth";
 
 export default function SignupForm() {
   const signup = useSignup();
+  const { initiateGoogleAuth } = useGoogleAuth();
+  
+  // Handle OAuth results
+  useOAuthHandler();
 
   const form = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -33,11 +37,11 @@ export default function SignupForm() {
       <Button
         variant={"outline"}
         className="w-full h-12 rounded-2xl text-base"
-        type="submit"
+        type="button"
         disabled={signup.isPending}
-        loading={signup.isPending}
+        onClick={initiateGoogleAuth}
       >
-        Register with Google
+        Continue with Google
       </Button>
       <div className="flex gap-2 items-center">
         <hr className="w-full h-0.5 bg-gray-300 rounded-full" />

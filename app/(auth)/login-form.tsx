@@ -2,7 +2,7 @@
 
 // Hooks & Next
 import { useForm } from "react-hook-form";
-import { useLogin } from "@/hooks/use-auth";
+import { useLogin, useGoogleAuth, useOAuthHandler } from "@/hooks/use-auth";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,10 @@ import { loginSchema, LoginInput } from "@/schemas/auth";
 
 export default function LoginForm() {
   const login = useLogin();
+  const { initiateGoogleAuth } = useGoogleAuth();
+  
+  // Handle OAuth results
+  useOAuthHandler();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -71,6 +75,7 @@ export default function LoginForm() {
         className="w-full h-12 rounded-2xl text-base"
         type="button"
         disabled={login.isPending}
+        onClick={initiateGoogleAuth}
       >
         Continue with Google
       </Button>
