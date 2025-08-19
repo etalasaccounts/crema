@@ -178,6 +178,12 @@ export function RecordControls() {
     // Reset local pause state
     setLocalIsPaused(false);
 
+    // Explicitly stop the screen stream to remove browser's screen sharing UI
+    if (mediaStreamManager.screenStream) {
+      mediaStreamManager.screenStream.getTracks().forEach(track => track.stop());
+      mediaStreamManager.setScreenStream(null);
+    }
+
     // Trigger the same event that browser 'Stop sharing' triggers
     // This ensures consistent behavior between custom stop button and browser stop
     mediaStreamManager.emit("screenSharingEnded", finalRecordingTime);
@@ -232,7 +238,7 @@ export function RecordControls() {
       // Stop the actual recording
       await stopRecording();
 
-      // Stop screen recording if active
+      // Explicitly stop the screen stream to remove browser's screen sharing UI
       if (mediaStreamManager.screenStream) {
         mediaStreamManager.screenStream
           .getTracks()

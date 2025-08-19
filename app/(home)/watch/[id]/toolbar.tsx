@@ -30,7 +30,7 @@ export default function ToolbarSection({ url }: ToolbarSectionInterface) {
       <div className="flex gap-2 items-center">
         <Button
           variant={"secondary"}
-          className="rounded-full size-11"
+          className="rounded-full size-11 cursor-pointer"
           onClick={() => {
             navigator.clipboard.writeText(url);
             toast.success("URL copied to clipboard");

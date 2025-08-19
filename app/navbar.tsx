@@ -1,14 +1,20 @@
 "use client";
 import React, { useState } from "react";
+import { RecordButton } from "@/components/record-button";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import {
-  HoveredLink,
-  Menu,
-  MenuItem,
-  ProductItem,
-} from "@/components/ui/navbar-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Menu } from "@/components/ui/navbar-menu";
 import { cn } from "@/lib/utils";
+import { getUserInitials } from "@/lib/user-utils";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function NavbarDemo() {
   return (
@@ -20,55 +26,17 @@ export function NavbarDemo() {
 
 function Navbar({ className }: { className?: string }) {
   const [active, setActive] = useState<string | null>(null);
+  const { user, isLoading, logout } = useCurrentUser();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <div
-      className={cn("fixed top-10 inset-x-0 max-w-lg mx-auto z-50", className)}
+      className={cn("fixed top-10 inset-x-0 max-w-2xl mx-auto z-50", className)}
     >
       <Menu setActive={setActive}>
-        {/* <MenuItem setActive={setActive} active={active} item="Services">
-          <div className="flex flex-col space-y-4 text-sm ">
-            <HoveredLink href="/web-dev">Web Development</HoveredLink>
-            <HoveredLink href="/interface-design">Interface Design</HoveredLink>
-            <HoveredLink href="/seo">Search Engine Optimization</HoveredLink>
-            <HoveredLink href="/branding">Branding</HoveredLink>
-          </div>
-        </MenuItem>
-        <MenuItem setActive={setActive} active={active} item="Products">
-          <div className="  text-sm grid grid-cols-2 gap-10 p-4 ">
-            <ProductItem
-              title="Algochurn"
-              href="https://algochurn.com"
-              src="https://assets.aceternity.com/demos/algochurn.webp"
-              description="Prepare for tech interviews like never before."
-            />
-            <ProductItem
-              title="Tailwind Master Kit"
-              href="https://tailwindmasterkit.com"
-              src="https://assets.aceternity.com/demos/tailwindmasterkit.webp"
-              description="Production ready Tailwind css components for your next project"
-            />
-            <ProductItem
-              title="Moonbeam"
-              href="https://gomoonbeam.com"
-              src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.51.31%E2%80%AFPM.png"
-              description="Never write from scratch again. Go from idea to blog in minutes."
-            />
-            <ProductItem
-              title="Rogue"
-              href="https://userogue.com"
-              src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.47.07%E2%80%AFPM.png"
-              description="Respond to government RFPs, RFIs and RFQs 10x faster using AI"
-            />
-          </div>
-        </MenuItem>
-        // <MenuItem setActive={setActive} active={active} item="Pricing">
-        //   <div className="flex flex-col space-y-4 text-sm">
-        //     <HoveredLink href="/hobby">Hobby</HoveredLink>
-        //     <HoveredLink href="/individual">Individual</HoveredLink>
-        //     <HoveredLink href="/team">Team</HoveredLink>
-        //     <HoveredLink href="/enterprise">Enterprise</HoveredLink>
-        //   </div>
-        // </MenuItem> */}
         <div className="flex gap-2 w-fit items-center">
           {" "}
           <Image
@@ -79,29 +47,68 @@ function Navbar({ className }: { className?: string }) {
           />{" "}
           <p className="text-xl font-medium text-white">Crema</p>
         </div>
+        <div className="flex gap-3 w-full justify-end">
+          <div className="flex gap-1 w-fit justify-end">
+            {isLoading ? (
+              <div className="flex gap-2 items-center">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+              </div>
+            ) : user ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="flex gap-2 items-center w-fit">
+                    <p className="text-white">{user.name}</p>
+                    <Avatar className="cursor-pointer hover:opacity-80">
+                      <AvatarFallback className="bg-white/20">
+                        {getUserInitials(user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  className="w-40 p-5 bg-background rounded-3xl"
+                >
+                  <div className="space-y-2 text-white">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm leading-none">
+                        {user.name}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
 
-        <div className="flex gap-2 w-full justify-end">
-          {" "}
-          <Button
-            variant="secondary"
-            size="lg"
-            className="text-base bg-white/20 hover:bg-white/30 text-white hover:text-white px-4 py-5"
-            onClick={() => {
-              window.location.href = "/login";
-            }}
-          >
-            Login
-          </Button>
-          <Button
-            variant="ghost"
-            size="lg"
-            className="rounded-full text-base bg-primary hover:bg-primary/90 text-white hover:text-white px-4 py-5"
-            onClick={() => {
-              window.location.href = "/signup";
-            }}
-          >
-            <p>Sign up free</p>
-          </Button>
+                    <div className="space-y-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start px-2"
+                        onClick={() => (window.location.href = "/account")}
+                      >
+                        Account
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start px-2"
+                        onClick={handleLogout}
+                      >
+                        Log out
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => (window.location.href = "/login")}
+              >
+                Login
+              </Button>
+            )}
+          </div>{" "}
+          <RecordButton />
         </div>
       </Menu>
     </div>

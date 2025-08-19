@@ -60,8 +60,12 @@ export const useCurrentUser = () => {
       // Update context with fresh user data
       login(data.user);
     } else if (isError && error?.message === "Unauthorized") {
-      // Clear context on unauthorized error
-      logout();
+      // Clear context on unauthorized error, but don't redirect on public pages
+      const currentPath = window.location.pathname;
+      const isPublicPage = currentPath === "/" || currentPath.startsWith("/watch/") || currentPath === "/login" || currentPath === "/signup";
+      
+      // Clear user state but only redirect if not on a public page
+      logout(!isPublicPage);
     }
   }, [data, isError, error, login, logout]);
 

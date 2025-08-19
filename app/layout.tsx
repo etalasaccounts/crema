@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export default function RootLayout({ children }: any) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans ]">
+      <body className="font-sans bg-background dark:bg-neutral-900">
         <QueryProvider>
           <AuthProvider>
             <ThemeProvider

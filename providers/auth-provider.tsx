@@ -9,7 +9,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (userData: UserContextInterface) => void;
-  logout: () => void;
+  logout: (shouldRedirect?: boolean) => void;
   updateUser: (userData: Partial<UserContextInterface>) => void;
 }
 
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   };
 
-  const logout = async () => {
+  const logout = async (shouldRedirect: boolean = true) => {
     try {
       // Call logout API to clear HTTP-only cookie
       await fetch("/api/auth/logout", {
@@ -65,7 +65,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       localStorage.removeItem("user");
       localStorage.removeItem("token");
-      router.push("/login");
+      if (shouldRedirect) {
+        router.push("/login");
+      }
     }
   };
 

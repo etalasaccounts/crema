@@ -1,73 +1,60 @@
-"use client";
-
-// Components
 import { VideoPlayer } from "@/components/video-player";
 import ToolbarSection from "./toolbar";
 import TitleSection from "./title";
-import { useVideo } from "@/hooks/use-video";
-import { useLogVideoView } from "@/hooks/use-video-views";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { use, useEffect, useRef } from "react";
+import { db } from "@/lib/db";
+import { notFound } from "next/navigation";
 
-export default function page({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const { data: video, isLoading, error } = useVideo(id);
-  const logViewMutation = useLogVideoView();
-  const hasLoggedView = useRef(false);
+interface VideoData {
+  id: string;
+  title: string;
+  videoUrl: string;
+  duration: number | null;
+  views: number;
+  createdAt: Date;
+  updatedAt: Date;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  workspace: {
+    id: string;
+    name: string;
+  };
+}
 
-  // Log video view when video loads (only once)
-  useEffect(() => {
-    if (video && !hasLoggedView.current) {
-      hasLoggedView.current = true;
-      logViewMutation.mutate(id);
-    }
-  }, [video, id, logViewMutation]);
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col max-w-5xl mx-auto gap-5">
-        {/* Toolbar Skeleton */}
-        <Skeleton className="h-12 w-full" />
-        {/* Video Player Skeleton */}
-        <Skeleton className="aspect-video w-full rounded-xl" />
-        {/* Title Skeleton */}
-        <div className="flex flex-row justify-between gap-4">
-          <div className="flex flex-col flex-1 gap-3">
-            <Skeleton className="h-8 w-3/4" />
-            <div className="flex gap-3 items-center">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <div className="flex flex-col gap-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-            </div>
-          </div>
-          <Skeleton className="h-6 w-20" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col max-w-5xl mx-auto gap-5">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error.message === "Video not found"
-              ? "This video could not be found. It may have been deleted or you don't have permission to view it."
-              : "Failed to load video. Please try again later."}
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
+async function getVideo(id: string): Promise<VideoData> {
+  const video = await db.video.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      workspace: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
 
   if (!video) {
-    return null;
+    notFound();
   }
+
+  return video;
+}
+
+export default async function page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const video = await getVideo(id);
 
   // Transform the video data to match the expected format
   const transformedVideo = {
@@ -85,13 +72,10 @@ export default function page({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="flex flex-col max-w-5xl mx-auto gap-5">
       {/* Toolbar */}
-      <ToolbarSection url={`${window.location.origin}/watch/${id}`} />
+      <ToolbarSection url={`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/watch/${id}`} />
       {/* Video Player */}
 
-      <VideoPlayer 
-        src={transformedVideo.video_url} 
-        duration={video.duration} 
-      />
+      <VideoPlayer src={transformedVideo.video_url} duration={video.duration ?? undefined} />
 
       {/* Title */}
       <TitleSection video={transformedVideo} />
