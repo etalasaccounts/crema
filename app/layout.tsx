@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export default function RootLayout({ children }: any) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans bg-background dark:bg-neutral-900">
+      <body className="font-sans bg-white">
         <QueryProvider>
           <AuthProvider>
             <ThemeProvider
@@ -20,6 +20,7 @@ export default function RootLayout({ children }: any) {
             >
               <ReduxProvider>
                 {children}
+
                 <Toaster />
                 {/* Floating theme toggle button */}
                 <div className="fixed top-6 right-6 z-50">
