@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { VideoThumbnail } from "@/components/video-thumbnail";
+import { VideoProgressBar } from "@/components/video-progress-bar";
 import { Ellipsis } from "lucide-react";
 import { getUserInitials } from "@/lib/user-utils";
 import { db } from "@/lib/db";
@@ -156,6 +157,7 @@ async function VideoList() {
 export default function page() {
   return (
     <div className="container">
+      <VideoProgressBar />
       <VideoList />
     </div>
   );

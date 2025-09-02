@@ -39,6 +39,14 @@ function Navbar({ className }: { className?: string }) {
     await logout();
   };
 
+  const handleLogoClick = () => {
+    if (user) {
+      router.push("/home");
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <div
       className={cn("fixed top-10 inset-x-0 max-w-2xl mx-auto z-50", className)}
@@ -51,6 +59,8 @@ function Navbar({ className }: { className?: string }) {
             alt="logo"
             width={114}
             height={28}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={handleLogoClick}
           />{" "}
         </div>
         <div className="flex gap-3 w-full justify-end">
@@ -90,9 +100,16 @@ function Navbar({ className }: { className?: string }) {
                       <Button
                         variant="ghost"
                         className="w-full justify-start px-2"
-                        onClick={() => (window.location.href = "/account")}
+                        onClick={() => router.push("/account")}
                       >
                         Account
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start px-2"
+                        onClick={() => router.push("/billing")}
+                      >
+                        Billing
                       </Button>
                       <Button
                         variant="ghost"

@@ -55,7 +55,7 @@ export default function HomePage() {
       {/* Trust Section */}
       <div className="container mx-auto px-6 pt-16 pb-16 md:pb-32">
         <div className="text-center space-y-12">
-          <h2 className="uppercase text-muted-foreground font-bold text-sm yygi9n,mol,md:text-lg tracking-wider">
+          <h2 className="uppercase text-neutral-500 font-bold text-sm sm:text-base md:text-lg tracking-wider">
             Used by companies and people working at
           </h2>
 
@@ -81,10 +81,10 @@ export default function HomePage() {
       <div className="w-full mx-auto px-6 py-20">
         {/* Section Header */}
         <div className="text-center pb-20">
-          <h2 className="text-5xl md:text-6xl font-bold leading-tight mb-8">
+          <h2 className="text-5xl md:text-6xl text-neutral-900 font-bold leading-tight mb-8">
             More than just a screen recorder
           </h2>
-          <p className="sm:text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="sm:text-xl text-neutral-500 max-w-3xl mx-auto">
             Discover how our platform transforms the way you create, share, and
             watch videos with cutting-edge technology and seamless user
             experience.
@@ -228,7 +228,7 @@ export default function HomePage() {
                 Do your own thing, replay later.
               </h3>
               <p className="text-white/90 text-lg">
-                ccess your recordings on your own schedule.
+                Access your recordings on your own schedule.
               </p>
             </div>
           </div>
