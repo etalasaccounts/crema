@@ -1,4 +1,4 @@
-import { VideoPlayer } from "@/components/video-player";
+import { EnhancedVideoPlayer } from "@/components/enhanced-video-player";
 import ToolbarSection from "./toolbar";
 import TitleSection from "./title";
 import { db } from "@/lib/db";
@@ -52,9 +52,16 @@ async function getVideo(id: string): Promise<VideoData> {
   return video;
 }
 
-export default async function page({ params }: { params: Promise<{ id: string }> }) {
+export default async function page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const video = await getVideo(id);
+
+  // Check if video is still being processed (no URL yet)
+  const isProcessing = !video.videoUrl || video.videoUrl === "";
 
   // Transform the video data to match the expected format
   const transformedVideo = {
@@ -72,10 +79,18 @@ export default async function page({ params }: { params: Promise<{ id: string }>
   return (
     <div className="flex flex-col max-w-5xl mx-auto gap-5">
       {/* Toolbar */}
-      <ToolbarSection url={`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/watch/${id}`} />
-      {/* Video Player */}
+      <ToolbarSection
+        url={`${
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        }/watch/${id}`}
+      />
 
-      <VideoPlayer src={transformedVideo.video_url} duration={video.duration ?? undefined} />
+      {/* Video Player */}
+      <EnhancedVideoPlayer
+        src={transformedVideo.video_url}
+        duration={video.duration ?? undefined}
+        isProcessing={isProcessing}
+      />
 
       {/* Title */}
       <TitleSection video={transformedVideo} />

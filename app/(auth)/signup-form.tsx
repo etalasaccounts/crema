@@ -2,7 +2,8 @@
 
 // Hooks & Next
 import { useForm } from "react-hook-form";
-import { useSignup, useGoogleAuth, useOAuthHandler } from "@/hooks/use-auth";
+import { useSignup, useGoogleAuth, useDropboxAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -15,9 +16,8 @@ import { signUpSchema, SignUpInput } from "@/schemas/auth";
 export default function SignupForm() {
   const signup = useSignup();
   const { initiateGoogleAuth } = useGoogleAuth();
-  
-  // Handle OAuth results
-  useOAuthHandler();
+  const { initiateDropboxAuth } = useDropboxAuth();
+  const router = useRouter();
 
   const form = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -34,19 +34,6 @@ export default function SignupForm() {
 
   return (
     <form onSubmit={form.handleSubmit(handleSignup)} className="space-y-4">
-      <Button
-        variant={"outline"}
-        className="w-full h-12 rounded-2xl text-base"
-        type="button"
-        disabled={signup.isPending}
-        onClick={initiateGoogleAuth}
-      >
-        Continue with Google
-      </Button>
-      <div className="flex gap-2 items-center">
-        <hr className="w-full h-0.5 bg-gray-300 rounded-full" />
-        or <hr className="w-full h-0.5 bg-gray-300 rounded-full" />
-      </div>
       <div className="space-y-1">
         <Input
           {...form.register("name")}
@@ -75,7 +62,6 @@ export default function SignupForm() {
           </p>
         )}
       </div>
-
       <div className="space-y-1">
         <Input
           {...form.register("password")}
@@ -91,13 +77,44 @@ export default function SignupForm() {
         )}
       </div>
       <Button
-        className="w-full rounded-2xl h-12 text-base"
+        className="w-full h-12 rounded-2xl text-base"
         type="submit"
         disabled={signup.isPending}
-        loading={signup.isPending}
       >
-        {signup.isPending ? "Creating account..." : "Join Crema"}
+        {signup.isPending ? "Creating Account..." : "Continue with Email"}
       </Button>
+      <div className="flex gap-2 items-center">
+        <hr className="w-full h-0.5 bg-border rounded-full" />
+        or <hr className="w-full h-0.5 bg-border rounded-full" />
+      </div>
+      <Button
+        variant={"outline"}
+        className="w-full h-12 rounded-2xl text-base"
+        type="button"
+        disabled={signup.isPending}
+        onClick={initiateGoogleAuth}
+      >
+        Continue with Google
+      </Button>
+      <Button
+        variant={"outline"}
+        className="w-full h-12 rounded-2xl text-base"
+        type="button"
+        disabled={signup.isPending}
+        onClick={initiateDropboxAuth}
+      >
+        Continue with Dropbox
+      </Button>
+      <div className="text-center text-sm pt-4">
+        Already have an account?{" "}
+        <button
+          type="button"
+          className="underline hover:no-underline"
+          onClick={() => router.push("/login")}
+        >
+          Log in
+        </button>
+      </div>
     </form>
   );
 }

@@ -24,6 +24,14 @@ model User {
   phone             String
   avatarUrl         String?
   activeWorkspaceId String?
+  // Google OAuth fields for Drive access
+  googleAccessToken String?
+  googleRefreshToken String?
+  googleTokenExpiry DateTime?
+  // Dropbox OAuth fields for file storage
+  dropboxAccessToken String?
+  dropboxRefreshToken String?
+  dropboxTokenExpiry DateTime?
   workspaces        Workspace[]
   activeWorkspace   Workspace? @relation("UserActiveWorkspace", fields: [activeWorkspaceId], references: [id])
   videos            Video[]
@@ -53,12 +61,19 @@ model Video {
   updatedAt   DateTime  @updatedAt
   title       String
   videoUrl    String
+  thumbnailUrl String?  // URL to the video thumbnail
   duration    Float?    // Duration in seconds
   views       Int       @default(0)
+  source      Source?   // Source of the video (Dropbox, Local, etc.)
   userId      String
   workspaceId String
   user        User      @relation(fields: [userId], references: [id])
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   @@map("videos")
+}
+
+enum Source {
+  Dropbox
+  Local
 }

@@ -4,6 +4,7 @@ export interface UserContextInterface {
   name: string;
   phone?: string;
   avatarUrl?: string;
+  accessToken?: string;
   active_workspace: string;
   isLoading?: boolean;
 }

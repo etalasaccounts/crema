@@ -7,18 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-
-    // Validate that ID is provided
-    if (!id) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Video ID is required",
-        },
-        { status: 400 }
-      );
-    }
-
+    
     // Fetch the video from the database
     const video = await db.video.findUnique({
       where: {
@@ -35,13 +24,11 @@ export async function GET(
         workspace: {
           select: {
             id: true,
-            name: true,
           },
         },
       },
     });
 
-    // Check if video exists
     if (!video) {
       return NextResponse.json(
         {

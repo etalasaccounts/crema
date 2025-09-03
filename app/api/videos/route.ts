@@ -5,11 +5,19 @@ import { z } from "zod";
 
 // Schema for creating a video
 const createVideoSchema = z.object({
-  videoUrl: z.string().url("Invalid video URL"),
+  videoUrl: z.string().url("Invalid video URL").optional(),
   userId: z.string().uuid("Invalid user ID"),
   workspaceId: z.string().uuid("Invalid workspace ID"),
   title: z.string().optional(),
   duration: z.number().positive("Duration must be positive").optional(),
+  thumbnailUrl: z.string().url("Invalid thumbnail URL").optional(),
+});
+
+// Schema for updating a video URL
+const updateVideoUrlSchema = z.object({
+  videoId: z.string().uuid("Invalid video ID"),
+  videoUrl: z.string().url("Invalid video URL"),
+  thumbnailUrl: z.string().url("Invalid thumbnail URL").optional(),
 });
 
 export async function GET() {
@@ -70,10 +78,13 @@ export async function POST(request: NextRequest) {
     const video = await db.video.create({
       data: {
         title,
-        videoUrl: validatedData.videoUrl,
+        videoUrl: validatedData.videoUrl || "", // Allow empty string if no URL provided
+        thumbnailUrl: validatedData.thumbnailUrl || null, // Add thumbnail URL
         userId: validatedData.userId,
         workspaceId: validatedData.workspaceId,
         duration: validatedData.duration,
+        // Set source as Dropbox if we have a URL, otherwise leave it null
+        source: validatedData.videoUrl ? "Dropbox" : null,
       },
       include: {
         user: {
@@ -114,6 +125,73 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: "Failed to create video record",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    console.log("Received video update request body:", body);
+
+    // Validate the request body
+    const validatedData = updateVideoUrlSchema.parse(body);
+    console.log("Validated data:", validatedData);
+
+    // Update the video record in the database
+    const video = await db.video.update({
+      where: {
+        id: validatedData.videoId,
+      },
+      data: {
+        videoUrl: validatedData.videoUrl,
+        thumbnailUrl: validatedData.thumbnailUrl || undefined, // Update thumbnail URL if provided
+        // Set source as Dropbox when updating the URL
+        source: "Dropbox",
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        workspace: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    console.log("Video record updated successfully:", video);
+
+    return NextResponse.json({
+      success: true,
+      video,
+    });
+  } catch (error) {
+    console.error("Error updating video:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation error",
+          details: error.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to update video record",
       },
       { status: 500 }
     );

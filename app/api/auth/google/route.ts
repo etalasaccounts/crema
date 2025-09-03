@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_REDIRECT_URI = `${
-  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-}/api/auth/google/callback`;
+const BASE_APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const GOOGLE_REDIRECT_URI = `${BASE_APP_URL}/api/auth/google/callback`;
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,7 +22,12 @@ export async function GET(request: NextRequest) {
         client_id: GOOGLE_CLIENT_ID,
         redirect_uri: GOOGLE_REDIRECT_URI,
         response_type: "code",
-        scope: "openid email profile",
+        scope: [
+          "openid",
+          "email",
+          "profile",
+          "https://www.googleapis.com/auth/drive",
+        ].join(" "),
         state: state,
         access_type: "offline",
         prompt: "consent",

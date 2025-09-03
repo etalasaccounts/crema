@@ -7,6 +7,7 @@ interface VideoThumbnailProps {
   videoUrl: string;
   title: string;
   duration?: number | null;
+  thumbnailUrl?: string | null; // Add thumbnailUrl prop
   className?: string;
 }
 
@@ -14,11 +15,12 @@ export function VideoThumbnail({
   videoUrl,
   title,
   duration,
+  thumbnailUrl, // Destructure thumbnailUrl
   className = "",
 }: VideoThumbnailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [generatedThumbnailUrl, setGeneratedThumbnailUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const formatDuration = (seconds: number) => {
@@ -27,7 +29,31 @@ export function VideoThumbnail({
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  // Extract file ID from Google Drive URLs for thumbnail generation
+  const getGoogleDriveFileId = (url: string): string | null => {
+    const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+  };
+
+  const isGoogleDrivePreview = videoUrl.includes('drive.google.com/file/d/') && videoUrl.includes('/preview');
+  const googleDriveFileId = isGoogleDrivePreview ? getGoogleDriveFileId(videoUrl) : null;
+
   useEffect(() => {
+    // If we already have a thumbnail URL from the database, use it directly
+    if (thumbnailUrl) {
+      setGeneratedThumbnailUrl(thumbnailUrl);
+      setIsLoading(false);
+      return;
+    }
+
+    if (isGoogleDrivePreview && googleDriveFileId) {
+      // Use Google Drive thumbnail API for preview URLs
+      const thumbnailUrl = `https://drive.google.com/thumbnail?id=${googleDriveFileId}&sz=w400-h300`;
+      setGeneratedThumbnailUrl(thumbnailUrl);
+      setIsLoading(false);
+      return;
+    }
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
@@ -48,7 +74,7 @@ export function VideoThumbnail({
           canvas.toBlob((blob) => {
             if (blob) {
               const url = URL.createObjectURL(blob);
-              setThumbnailUrl(url);
+              setGeneratedThumbnailUrl(url);
               setIsLoading(false);
             } else {
               // Fallback: use video poster or default thumbnail
@@ -93,20 +119,20 @@ export function VideoThumbnail({
       video.removeEventListener("error", handleError);
       
       // Clean up blob URL
-      if (thumbnailUrl) {
-        URL.revokeObjectURL(thumbnailUrl);
+      if (generatedThumbnailUrl) {
+        URL.revokeObjectURL(generatedThumbnailUrl);
       }
     };
-  }, [videoUrl, duration]);
+  }, [videoUrl, duration, isGoogleDrivePreview, googleDriveFileId, thumbnailUrl]);
 
   // Clean up blob URL on unmount
   useEffect(() => {
     return () => {
-      if (thumbnailUrl) {
-        URL.revokeObjectURL(thumbnailUrl);
+      if (generatedThumbnailUrl && !thumbnailUrl) {
+        URL.revokeObjectURL(generatedThumbnailUrl);
       }
     };
-  }, [thumbnailUrl]);
+  }, [generatedThumbnailUrl, thumbnailUrl]);
 
   return (
     <div className={`relative aspect-video rounded-2xl overflow-hidden group ${className}`}>
@@ -127,10 +153,10 @@ export function VideoThumbnail({
         <div className="w-full h-full bg-muted-foreground animate-pulse flex items-center justify-center">
           <div className="text-muted text-sm">Loading...</div>
         </div>
-      ) : thumbnailUrl ? (
+      ) : generatedThumbnailUrl ? (
         <>
           <img
-            src={thumbnailUrl}
+            src={generatedThumbnailUrl}
             alt={`Thumbnail for ${title}`}
             className="w-full h-full object-cover"
           />
@@ -149,7 +175,7 @@ export function VideoThumbnail({
             </div>
           )}
         </>
-      ) : (
+      ) : !isGoogleDrivePreview ? (
         <>
           {/* Fallback: Show video element as thumbnail */}
           <video
@@ -163,6 +189,29 @@ export function VideoThumbnail({
               video.currentTime = duration ? Math.min(1, duration * 0.1) : 1;
             }}
           />
+          
+          {/* Play button overlay */}
+          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+            <div className="bg-black/60 rounded-full p-3">
+              <Play className="w-6 h-6 text-white fill-white" />
+            </div>
+          </div>
+          
+          {/* Duration badge */}
+          {duration && duration > 0 && (
+            <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+              {formatDuration(duration)}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Fallback for Google Drive when thumbnail fails to load */}
+          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex flex-col items-center justify-center text-white relative">
+            <Play className="h-12 w-12 mb-2 opacity-80" />
+            <span className="text-sm font-medium opacity-90">Google Drive Video</span>
+            <span className="text-xs opacity-70 mt-1 px-2 text-center">{title}</span>
+          </div>
           
           {/* Play button overlay */}
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">

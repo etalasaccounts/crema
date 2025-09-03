@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import React, { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
 
 interface AnimatedGradientBackgroundProps {
   /**
@@ -82,6 +83,16 @@ const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
   topOffset = 0,
   containerClassName = "",
 }) => {
+  const { theme, resolvedTheme } = useTheme();
+  
+  // Adjust gradient colors based on theme
+  const adjustedGradientColors = gradientColors.map(color => {
+    // Convert #FFF to #0a0a0a in dark mode
+    if (color.toUpperCase() === '#FFF' || color.toUpperCase() === '#FFFFFF') {
+      return (resolvedTheme === 'dark' || theme === 'dark') ? '#0a0a0a' : color;
+    }
+    return color;
+  });
   // Validation: Ensure gradientStops and gradientColors lengths match
   if (gradientColors.length !== gradientStops.length) {
     throw new Error(
@@ -106,7 +117,7 @@ const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
       width += directionWidth * animationSpeed;
 
       const gradientStopsString = gradientStops
-        .map((stop, index) => `${gradientColors[index]} ${stop}%`)
+        .map((stop, index) => `${adjustedGradientColors[index]} ${stop}%`)
         .join(", ");
 
       const gradient = `radial-gradient(${width}% ${
@@ -126,7 +137,7 @@ const AnimatedGradientBackground: React.FC<AnimatedGradientBackgroundProps> = ({
   }, [
     startingGap,
     Breathing,
-    gradientColors,
+    adjustedGradientColors,
     gradientStops,
     animationSpeed,
     breathingRange,

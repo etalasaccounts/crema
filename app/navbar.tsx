@@ -76,9 +76,13 @@ function Navbar({ className }: { className?: string }) {
                   <div className="flex gap-2 items-center w-fit">
                     <p className="text-white">{user.name}</p>
                     <Avatar className="cursor-pointer hover:opacity-80">
-                      <AvatarFallback className="bg-white/20">
-                        {getUserInitials(user.name)}
-                      </AvatarFallback>
+                      {user.avatarUrl ? (
+                        <AvatarImage src={user.avatarUrl} alt={user.name} />
+                      ) : (
+                        <AvatarFallback className="bg-white/20">
+                          {getUserInitials(user.name)}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                   </div>
                 </PopoverTrigger>

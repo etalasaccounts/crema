@@ -2,7 +2,7 @@
 import Link from "next/link";
 
 // Force dynamic rendering for this page since it uses cookies
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ interface VideoData {
   id: string;
   title: string;
   videoUrl: string;
+  thumbnailUrl: string | null;
   duration: number | null;
   views: number;
   createdAt: Date;
@@ -37,7 +38,7 @@ async function getVideos(): Promise<VideoData[]> {
   try {
     // Get current user's active workspace
     const activeWorkspaceId = await getCurrentUserWorkspaceId();
-    
+
     // If no active workspace, return empty array
     if (!activeWorkspaceId) {
       return [];
@@ -118,6 +119,7 @@ async function VideoList() {
             videoUrl={video.videoUrl}
             title={video.title}
             duration={video.duration}
+            thumbnailUrl={video.thumbnailUrl}
           />
           <div className="gap-1 w-full">
             {" "}

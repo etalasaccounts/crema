@@ -80,3 +80,71 @@ export function formatDuration(seconds: number): string {
 
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
+
+/**
+ * Generates a thumbnail from a video blob
+ * @param videoBlob - The video blob to generate thumbnail from
+ * @param time - Time in seconds to capture the thumbnail (default: 1)
+ * @returns Promise<Blob | null> - Thumbnail as a blob, or null if failed
+ */
+export async function generateThumbnailFromVideoBlob(
+  videoBlob: Blob,
+  time: number = 1
+): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    try {
+      // Create a video element to load the blob
+      const video = document.createElement("video");
+      const url = URL.createObjectURL(videoBlob);
+
+      video.preload = "metadata";
+      video.muted = true;
+
+      video.onloadedmetadata = () => {
+        // Set the time to capture the thumbnail
+        video.currentTime = Math.min(time, video.duration || time);
+      };
+
+      video.onseeked = () => {
+        // Create a canvas to draw the thumbnail
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          // Draw the current frame to canvas
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          // Convert canvas to blob
+          canvas.toBlob(
+            (blob) => {
+              // Clean up the object URL
+              URL.revokeObjectURL(url);
+              resolve(blob);
+            },
+            "image/jpeg",
+            0.8
+          );
+        } else {
+          // Clean up the object URL
+          URL.revokeObjectURL(url);
+          resolve(null);
+        }
+      };
+
+      video.onerror = () => {
+        // Clean up the object URL
+        URL.revokeObjectURL(url);
+        console.warn("Failed to load video for thumbnail generation");
+        resolve(null);
+      };
+
+      // Set the source to trigger metadata loading
+      video.src = url;
+    } catch (error) {
+      console.error("Error generating thumbnail from video blob:", error);
+      resolve(null);
+    }
+  });
+}

@@ -6,6 +6,7 @@ interface VideoData {
   id: string;
   title: string;
   videoUrl: string;
+  thumbnailUrl: string | null;
   duration?: number;
   views: number;
   createdAt: string;

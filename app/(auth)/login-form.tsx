@@ -2,7 +2,7 @@
 
 // Hooks & Next
 import { useForm } from "react-hook-form";
-import { useLogin, useGoogleAuth, useOAuthHandler } from "@/hooks/use-auth";
+import { useLogin, useGoogleAuth, useDropboxAuth, useOAuthHandler } from "@/hooks/use-auth";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { loginSchema, LoginInput } from "@/schemas/auth";
 export default function LoginForm() {
   const login = useLogin();
   const { initiateGoogleAuth } = useGoogleAuth();
+  const { initiateDropboxAuth } = useDropboxAuth();
 
   // Handle OAuth results
   useOAuthHandler();
@@ -77,6 +78,15 @@ export default function LoginForm() {
         onClick={initiateGoogleAuth}
       >
         Continue with Google
+      </Button>
+      <Button
+        variant={"outline"}
+        className="w-full h-12 rounded-2xl text-base"
+        type="button"
+        disabled={login.isPending}
+        onClick={initiateDropboxAuth}
+      >
+        Continue with Dropbox
       </Button>
     </form>
   );

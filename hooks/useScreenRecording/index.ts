@@ -16,7 +16,7 @@ interface UseScreenRecordingReturn {
 }
 
 export function useScreenRecording({
-  mimeType = 'video/webm;codecs=vp9',
+  mimeType = 'video/webm;codecs=vp8,opus',
   videoBitsPerSecond = 2500000
 }: ScreenRecordingOptions = {}): UseScreenRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);

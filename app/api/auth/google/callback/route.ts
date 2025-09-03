@@ -5,9 +5,8 @@ import { Prisma } from "@/lib/generated/prisma";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_REDIRECT_URI = `${
-  process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-}/api/auth/google/callback`;
+const BASE_APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const GOOGLE_REDIRECT_URI = `${BASE_APP_URL}/api/auth/google/callback`;
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 const JWT_EXPIRES_IN = "7d";
 
@@ -41,17 +40,13 @@ export async function GET(request: NextRequest) {
     // Check for OAuth errors
     if (error) {
       return NextResponse.redirect(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/login?error=oauth_error`
+        `${BASE_APP_URL}/login?error=oauth_error`
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/login?error=missing_code`
+        `${BASE_APP_URL}/login?error=missing_code`
       );
     }
 
@@ -59,17 +54,13 @@ export async function GET(request: NextRequest) {
     const storedState = request.cookies.get("oauth_state")?.value;
     if (!storedState || storedState !== state) {
       return NextResponse.redirect(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/login?error=invalid_state`
+        `${BASE_APP_URL}/login?error=invalid_state`
       );
     }
 
     if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
       return NextResponse.redirect(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/login?error=oauth_config`
+        `${BASE_APP_URL}/login?error=oauth_config`
       );
     }
 
@@ -91,9 +82,7 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       console.error("Token exchange failed:", await tokenResponse.text());
       return NextResponse.redirect(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/login?error=token_exchange`
+        `${BASE_APP_URL}/login?error=token_exchange`
       );
     }
 
@@ -107,9 +96,7 @@ export async function GET(request: NextRequest) {
     if (!userResponse.ok) {
       console.error("Failed to fetch user info:", await userResponse.text());
       return NextResponse.redirect(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/login?error=user_info`
+        `${BASE_APP_URL}/login?error=user_info`
       );
     }
 
@@ -117,11 +104,12 @@ export async function GET(request: NextRequest) {
 
     if (!googleUser.verified_email) {
       return NextResponse.redirect(
-        `${
-          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-        }/login?error=unverified_email`
+        `${BASE_APP_URL}/login?error=unverified_email`
       );
     }
+
+    // Calculate token expiry time
+    const tokenExpiryTime = new Date(Date.now() + tokens.expires_in * 1000);
 
     // Check if user exists or create new user
     let user = await db.user.findUnique({
@@ -132,6 +120,7 @@ export async function GET(request: NextRequest) {
         email: true,
         createdAt: true,
         activeWorkspaceId: true,
+        avatarUrl: true,
       },
     });
 
@@ -145,12 +134,17 @@ export async function GET(request: NextRequest) {
             email: googleUser.email,
             password: "", // No password for OAuth users
             phone: "", // Default empty phone
+            avatarUrl: googleUser.picture || null, // Add avatar URL from Google
+            googleAccessToken: tokens.access_token,
+            googleRefreshToken: tokens.refresh_token || null,
+            googleTokenExpiry: tokenExpiryTime,
           },
           select: {
             id: true,
             name: true,
             email: true,
             createdAt: true,
+            avatarUrl: true,
           },
         });
 
@@ -172,6 +166,7 @@ export async function GET(request: NextRequest) {
             email: true,
             createdAt: true,
             activeWorkspaceId: true,
+            avatarUrl: true,
           },
         });
 
@@ -179,6 +174,31 @@ export async function GET(request: NextRequest) {
       });
 
       user = result;
+    } else {
+      // Update existing user with new tokens and avatar if needed
+      const updateData: any = {
+        googleAccessToken: tokens.access_token,
+        googleRefreshToken: tokens.refresh_token || null,
+        googleTokenExpiry: tokenExpiryTime,
+      };
+      
+      // If user doesn't have an avatar URL, update it with Google's picture
+      if (!user.avatarUrl && googleUser.picture) {
+        updateData.avatarUrl = googleUser.picture;
+      }
+      
+      user = await db.user.update({
+        where: { id: user.id },
+        data: updateData,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          createdAt: true,
+          activeWorkspaceId: true,
+          avatarUrl: true,
+        },
+      });
     }
 
     // Create JWT token
@@ -193,9 +213,7 @@ export async function GET(request: NextRequest) {
 
     // Create response with redirect to home
     const response = NextResponse.redirect(
-      `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }/home?auth=success`
+      `${BASE_APP_URL}/home?auth=success`
     );
 
     // Set HTTP-only cookie
@@ -218,17 +236,13 @@ export async function GET(request: NextRequest) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
         return NextResponse.redirect(
-          `${
-            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-          }/login?error=email_exists`
+          `${BASE_APP_URL}/login?error=email_exists`
         );
       }
     }
 
     return NextResponse.redirect(
-      `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }/login?error=oauth_callback`
+      `${BASE_APP_URL}/login?error=oauth_callback`
     );
   }
 }

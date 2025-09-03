@@ -1,4 +1,5 @@
 import "./globals.css";
+
 import { ThemeProvider } from "@/providers/theme-provider";
 import { ReduxProvider } from "@/providers/redux-provider";
 import QueryProvider from "@/providers/query-provider";
@@ -9,7 +10,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export default function RootLayout({ children }: any) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans bg-white">
+      <body className="font-sans bg-background">
         <QueryProvider>
           <AuthProvider>
             <ThemeProvider

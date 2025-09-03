@@ -114,6 +114,7 @@ export const useOAuthHandler = () => {
   useEffect(() => {
     const authStatus = searchParams.get('auth');
     const error = searchParams.get('error');
+    const details = searchParams.get('details');
 
     if (authStatus === 'success') {
       // Fetch user data from the me endpoint
@@ -126,7 +127,7 @@ export const useOAuthHandler = () => {
           if (data.user) {
             // Set user data in auth context
             login(data.user);
-            toast.success('Successfully logged in with Google!');
+            toast.success('Successfully logged in!');
           } else {
             toast.error('Failed to fetch user data');
           }
@@ -146,14 +147,16 @@ export const useOAuthHandler = () => {
         invalid_state: 'Invalid authentication state',
         oauth_config: 'OAuth configuration error',
         token_exchange: 'Failed to exchange authorization code',
+        token_error: 'Failed to obtain access token',
         user_info: 'Failed to retrieve user information',
-        unverified_email: 'Email address is not verified with Google',
+        unverified_email: 'Email address is not verified',
         email_exists: 'An account with this email already exists',
-        oauth_callback: 'OAuth callback error'
+        oauth_callback: 'Authentication failed'
       };
 
       const errorMessage = errorMessages[error] || 'Authentication failed';
-      toast.error(errorMessage);
+      const fullMessage = details ? `${errorMessage}: ${details}` : errorMessage;
+      toast.error(fullMessage);
       
       // Clear the error from URL
       router.replace('/login');
@@ -168,4 +171,13 @@ export const useGoogleAuth = () => {
   };
 
   return { initiateGoogleAuth };
+};
+
+// Hook for initiating Dropbox OAuth
+export const useDropboxAuth = () => {
+  const initiateDropboxAuth = () => {
+    window.location.href = '/api/auth/dropbox';
+  };
+
+  return { initiateDropboxAuth };
 };
