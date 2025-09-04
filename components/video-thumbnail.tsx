@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { Play } from "lucide-react";
+import Image from "next/image";
 
 interface VideoThumbnailProps {
   videoUrl: string;
@@ -176,7 +177,8 @@ export function VideoThumbnail({
           <Image
             src={generatedThumbnailUrl}
             alt={`Thumbnail for ${title}`}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
 
           {/* Play button overlay */}
@@ -196,17 +198,19 @@ export function VideoThumbnail({
       ) : !isGoogleDrivePreview ? (
         <>
           {/* Fallback: Show video element as thumbnail */}
-          <video
-            src={videoUrl}
-            className="w-full h-full object-cover"
-            muted
-            playsInline
-            preload="metadata"
-            onLoadedData={(e) => {
-              const video = e.target as HTMLVideoElement;
-              video.currentTime = duration ? Math.min(1, duration * 0.1) : 1;
-            }}
-          />
+          <div className="relative w-full h-full">
+            <video
+              src={videoUrl}
+              className="w-full h-full object-cover"
+              muted
+              playsInline
+              preload="metadata"
+              onLoadedData={(e) => {
+                const video = e.target as HTMLVideoElement;
+                video.currentTime = duration ? Math.min(1, duration * 0.1) : 1;
+              }}
+            />
+          </div>
 
           {/* Play button overlay */}
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">

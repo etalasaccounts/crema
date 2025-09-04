@@ -7,7 +7,8 @@ export default function NotFound() {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          This video could not be found. It may have been deleted or you don't have permission to view it.
+          This video could not be found. It may have been deleted or you
+          don&apos;t have permission to view it.
         </AlertDescription>
       </Alert>
     </div>

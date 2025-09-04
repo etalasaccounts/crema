@@ -128,8 +128,8 @@ export function VideoActions({ video }: VideoActionsProps) {
           <DialogHeader>
             <DialogTitle>Delete Video</DialogTitle>
             <DialogDescription className="text-neutral-400">
-              Are you sure you want to delete "{video.title}"? This action
-              cannot be undone.
+              Are you sure you want to delete &apos;{video.title}&apos;? This
+              action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:space-x-0">

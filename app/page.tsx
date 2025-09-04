@@ -21,7 +21,7 @@ export default function HomePage() {
             SCREEN RECORDER
           </p>
           <div className="text-5xl sm:text-6xl lg:text-8xl font-bold text-neutral-50 leading-tight">
-            Share your work, even it's{" "}
+            Share your work, even itdon&apos;ts
             <span>
               <ContainerTextFlip
                 words={["undone", "messy", "look bad", "unfinished"]}
@@ -114,8 +114,10 @@ export default function HomePage() {
                 Ready? Action!
               </h2>
               <p className="sm:text-lg">
-                Start recording instantly with just one click. No complex setup, no technical knowledge required. 
-                Crema makes screen recording as simple as pressing a button, so you can focus on what matters most—your work.
+                Start recording instantly with just one click. No complex setup,
+                no technical knowledge required. Crema makes screen recording as
+                simple as pressing a button, so you can focus on what matters
+                most—your work.
               </p>
               <Link
                 href="/signup"
@@ -136,8 +138,10 @@ export default function HomePage() {
                 Share it to your team, or to the world!
               </h2>
               <p className="sm:text-lg">
-                Instantly share your recordings with secure links. Whether it's a quick demo for your team, 
-                a tutorial for clients, or feedback for stakeholders—your content reaches the right people at the right time.
+                Instantly share your recordings with secure links. Whether
+                itdon&apos;ts a quick demo for your team, a tutorial for
+                clients, or feedback for stakeholders—your content reaches the
+                right people at the right time.
               </p>
               <Link
                 href="/signup"
@@ -185,8 +189,9 @@ export default function HomePage() {
             <br /> with Crema.
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Experience the freedom of asynchronous communication. Record once, share everywhere, 
-            and let your team catch up on their own time—no more scheduling conflicts.
+            Experience the freedom of asynchronous communication. Record once,
+            share everywhere, and let your team catch up on their own time—no
+            more scheduling conflicts.
           </p>
         </div>
 
@@ -278,23 +283,30 @@ export default function HomePage() {
                 {[
                   {
                     question: "How do I start recording my screen with Crema?",
-                    answer: "Simply click the record button and select what you want to capture. Crema works instantly in your browser—no downloads or installations required."
+                    answer:
+                      "Simply click the record button and select what you want to capture. Crema works instantly in your browser—no downloads or installations required.",
                   },
                   {
-                    question: "Can I record audio along with my screen recording?",
-                    answer: "Yes! Crema captures both your screen and audio simultaneously. You can record system audio, microphone input, or both depending on your needs."
+                    question:
+                      "Can I record audio along with my screen recording?",
+                    answer:
+                      "Yes! Crema captures both your screen and audio simultaneously. You can record system audio, microphone input, or both depending on your needs.",
                   },
                   {
-                    question: "How do I share my recordings after creating them?",
-                    answer: "Once your recording is complete, you'll get a secure shareable link instantly. You can also download the video file or integrate with your favorite tools."
+                    question:
+                      "How do I share my recordings after creating them?",
+                    answer:
+                      "Once your recording is complete, you'll get a secure shareable link instantly. You can also download the video file or integrate with your favorite tools.",
                   },
                   {
                     question: "Is Crema free to use?",
-                    answer: "We offer a free tier with basic recording features. For advanced features like longer recordings and team collaboration, check out our premium plans."
+                    answer:
+                      "We offer a free tier with basic recording features. For advanced features like longer recordings and team collaboration, check out our premium plans.",
                   },
                   {
                     question: "What browsers and devices does Crema support?",
-                    answer: "Crema works on all modern browsers including Chrome, Firefox, Safari, and Edge. It's compatible with Windows, Mac, and Linux systems."
+                    answer:
+                      "Crema works on all modern browsers including Chrome, Firefox, Safari, and Edge. It's compatible with Windows, Mac, and Linux systems.",
                   },
                 ].map((faq, index) => (
                   <div
@@ -309,9 +321,7 @@ export default function HomePage() {
                         <Plus className="w-6 h-6 text-blue-600" />
                       </div>
                     </div>
-                    <p className="text-gray-600 mt-3 pr-4">
-                      {faq.answer}
-                    </p>
+                    <p className="text-gray-600 mt-3 pr-4">{faq.answer}</p>
                   </div>
                 ))}
               </div>
