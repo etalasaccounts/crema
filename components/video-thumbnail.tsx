@@ -20,7 +20,9 @@ export function VideoThumbnail({
 }: VideoThumbnailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [generatedThumbnailUrl, setGeneratedThumbnailUrl] = useState<string | null>(null);
+  const [generatedThumbnailUrl, setGeneratedThumbnailUrl] = useState<
+    string | null
+  >(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const formatDuration = (seconds: number) => {
@@ -35,8 +37,12 @@ export function VideoThumbnail({
     return match ? match[1] : null;
   };
 
-  const isGoogleDrivePreview = videoUrl.includes('drive.google.com/file/d/') && videoUrl.includes('/preview');
-  const googleDriveFileId = isGoogleDrivePreview ? getGoogleDriveFileId(videoUrl) : null;
+  const isGoogleDrivePreview =
+    videoUrl.includes("drive.google.com/file/d/") &&
+    videoUrl.includes("/preview");
+  const googleDriveFileId = isGoogleDrivePreview
+    ? getGoogleDriveFileId(videoUrl)
+    : null;
 
   useEffect(() => {
     // If we already have a thumbnail URL from the database, use it directly
@@ -69,18 +75,22 @@ export function VideoThumbnail({
         if (ctx) {
           // Draw the current frame to canvas
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          
+
           // Convert canvas to blob URL
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const url = URL.createObjectURL(blob);
-              setGeneratedThumbnailUrl(url);
-              setIsLoading(false);
-            } else {
-              // Fallback: use video poster or default thumbnail
-              setIsLoading(false);
-            }
-          }, "image/jpeg", 0.8);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const url = URL.createObjectURL(blob);
+                setGeneratedThumbnailUrl(url);
+                setIsLoading(false);
+              } else {
+                // Fallback: use video poster or default thumbnail
+                setIsLoading(false);
+              }
+            },
+            "image/jpeg",
+            0.8
+          );
         }
       } catch (error) {
         console.error("Error generating thumbnail:", error);
@@ -117,13 +127,19 @@ export function VideoThumbnail({
       video.removeEventListener("loadeddata", handleLoadedData);
       video.removeEventListener("seeked", handleSeeked);
       video.removeEventListener("error", handleError);
-      
+
       // Clean up blob URL
       if (generatedThumbnailUrl) {
         URL.revokeObjectURL(generatedThumbnailUrl);
       }
     };
-  }, [videoUrl, duration, isGoogleDrivePreview, googleDriveFileId, thumbnailUrl]);
+  }, [
+    videoUrl,
+    duration,
+    isGoogleDrivePreview,
+    googleDriveFileId,
+    thumbnailUrl,
+  ]);
 
   // Clean up blob URL on unmount
   useEffect(() => {
@@ -135,7 +151,9 @@ export function VideoThumbnail({
   }, [generatedThumbnailUrl, thumbnailUrl]);
 
   return (
-    <div className={`relative aspect-video rounded-2xl overflow-hidden group ${className}`}>
+    <div
+      className={`relative aspect-video rounded-2xl overflow-hidden group ${className}`}
+    >
       {/* Hidden video element for thumbnail generation */}
       <video
         ref={videoRef}
@@ -144,10 +162,10 @@ export function VideoThumbnail({
         playsInline
         preload="metadata"
       />
-      
+
       {/* Hidden canvas for thumbnail generation */}
       <canvas ref={canvasRef} className="hidden" />
-      
+
       {/* Thumbnail display */}
       {isLoading ? (
         <div className="w-full h-full bg-muted-foreground animate-pulse flex items-center justify-center">
@@ -155,19 +173,19 @@ export function VideoThumbnail({
         </div>
       ) : generatedThumbnailUrl ? (
         <>
-          <img
+          <Image
             src={generatedThumbnailUrl}
             alt={`Thumbnail for ${title}`}
             className="w-full h-full object-cover"
           />
-          
+
           {/* Play button overlay */}
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
             <div className="bg-black/60 rounded-full p-3">
               <Play className="w-6 h-6 text-white fill-white" />
             </div>
           </div>
-          
+
           {/* Duration badge */}
           {duration && duration > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
@@ -189,14 +207,14 @@ export function VideoThumbnail({
               video.currentTime = duration ? Math.min(1, duration * 0.1) : 1;
             }}
           />
-          
+
           {/* Play button overlay */}
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
             <div className="bg-black/60 rounded-full p-3">
               <Play className="w-6 h-6 text-white fill-white" />
             </div>
           </div>
-          
+
           {/* Duration badge */}
           {duration && duration > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
@@ -209,17 +227,21 @@ export function VideoThumbnail({
           {/* Fallback for Google Drive when thumbnail fails to load */}
           <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex flex-col items-center justify-center text-white relative">
             <Play className="h-12 w-12 mb-2 opacity-80" />
-            <span className="text-sm font-medium opacity-90">Google Drive Video</span>
-            <span className="text-xs opacity-70 mt-1 px-2 text-center">{title}</span>
+            <span className="text-sm font-medium opacity-90">
+              Google Drive Video
+            </span>
+            <span className="text-xs opacity-70 mt-1 px-2 text-center">
+              {title}
+            </span>
           </div>
-          
+
           {/* Play button overlay */}
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
             <div className="bg-black/60 rounded-full p-3">
               <Play className="w-6 h-6 text-white fill-white" />
             </div>
           </div>
-          
+
           {/* Duration badge */}
           {duration && duration > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { NavbarDemo } from "./navbar";
 import { ContainerTextFlip } from "@/components/ui/container-text-flip";
 import AnimatedGradientBackground from "@/components/magicui/animated-gradient-background";
@@ -32,7 +33,9 @@ export default function HomePage() {
             it, share it, and keep moving.
           </p>
 
-          <Button className="rounded-full text-2xl p-8">Join Beta</Button>
+          <Link href="/signup">
+            <Button className="rounded-full text-2xl p-8">Join Beta</Button>
+          </Link>
         </div>
       </div>
 
@@ -108,20 +111,18 @@ export default function HomePage() {
             {/* Right - Text Content */}
             <div className="flex-1 space-y-3 lg:space-y-6">
               <h2 className="text-2xl lg:text-4xl font-bold leading-tight">
-                Ready? action!
+                Ready? Action!
               </h2>
               <p className="sm:text-lg">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore? Ut enim ad minim veniam.
-                Lorem ipsum dolor sit amet consectetur adipiscing elit sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                Start recording instantly with just one click. No complex setup, no technical knowledge required. 
+                Crema makes screen recording as simple as pressing a button, so you can focus on what matters most—your work.
               </p>
-              <a
-                href="#"
+              <Link
+                href="/signup"
                 className="inline-flex items-center gap-2 text-blue-600 font-semibold text-lg hover:text-blue-700"
               >
-                Lorem ipsum →
-              </a>
+                Get Started →
+              </Link>
             </div>
           </div>
         </div>
@@ -135,17 +136,15 @@ export default function HomePage() {
                 Share it to your team, or to the world!
               </h2>
               <p className="sm:text-lg">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore? Ut enim ad minim veniam.
-                Lorem ipsum dolor sit amet consectetur adipiscing elit sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                Instantly share your recordings with secure links. Whether it's a quick demo for your team, 
+                a tutorial for clients, or feedback for stakeholders—your content reaches the right people at the right time.
               </p>
-              <a
-                href="#"
+              <Link
+                href="/signup"
                 className="inline-flex items-center gap-2 text-blue-600 font-semibold text-lg hover:text-blue-700"
               >
-                Lorem ipsum →
-              </a>
+                Learn More →
+              </Link>
             </div>
 
             {/* Right - Video Gallery Mockup */}
@@ -169,9 +168,11 @@ export default function HomePage() {
           <h2 className="text-white text-2xl sm:text-4xl font-bold">
             Like what you see so far? Join Beta
           </h2>
-          <Button className="p-8 text-2xl hidden md:flex rounded-full whitespace-nowrap">
-            Join Demo
-          </Button>
+          <Link href="/signup">
+            <Button className="p-8 text-2xl hidden md:flex rounded-full whitespace-nowrap">
+              Join Demo
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -180,13 +181,12 @@ export default function HomePage() {
         {/* Section Header */}
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-            A Screen Recorder that changes
-            <br /> the way you work.
+            Work smarter, not harder
+            <br /> with Crema.
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover how our platform transforms the way you create, share, and
-            watch videos with cutting-edge technology and seamless user
-            experience.
+            Experience the freedom of asynchronous communication. Record once, share everywhere, 
+            and let your team catch up on their own time—no more scheduling conflicts.
           </p>
         </div>
 
@@ -276,22 +276,42 @@ export default function HomePage() {
             <div className="lg:col-span-2 bg-white border border-border rounded-r-3xl lg:rounded-l-none rounded-l-3xl p-8 lg:p-12">
               <div className="space-y-6">
                 {[
-                  "How do I start recording my screen with Crema?",
-                  "What video formats does Crema support?",
-                  "Can I record audio along with my screen recording?",
-                  "How do I share my recordings after creating them?",
-                  "What are the system requirements for Crema?",
-                ].map((question, index) => (
+                  {
+                    question: "How do I start recording my screen with Crema?",
+                    answer: "Simply click the record button and select what you want to capture. Crema works instantly in your browser—no downloads or installations required."
+                  },
+                  {
+                    question: "Can I record audio along with my screen recording?",
+                    answer: "Yes! Crema captures both your screen and audio simultaneously. You can record system audio, microphone input, or both depending on your needs."
+                  },
+                  {
+                    question: "How do I share my recordings after creating them?",
+                    answer: "Once your recording is complete, you'll get a secure shareable link instantly. You can also download the video file or integrate with your favorite tools."
+                  },
+                  {
+                    question: "Is Crema free to use?",
+                    answer: "We offer a free tier with basic recording features. For advanced features like longer recordings and team collaboration, check out our premium plans."
+                  },
+                  {
+                    question: "What browsers and devices does Crema support?",
+                    answer: "Crema works on all modern browsers including Chrome, Firefox, Safari, and Edge. It's compatible with Windows, Mac, and Linux systems."
+                  },
+                ].map((faq, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between py-4 border-b border-gray-100 last:border-b-0"
+                    className="py-4 border-b border-gray-100 last:border-b-0"
                   >
-                    <h3 className="text-lg lg:text-xl font-semibold text-gray-900 pr-4">
-                      {question}
-                    </h3>
-                    <div className="flex-shrink-0">
-                      <Plus className="w-6 h-6 text-blue-600" />
+                    <div className="flex items-center justify-between cursor-pointer">
+                      <h3 className="text-lg lg:text-xl font-semibold text-gray-900 pr-4">
+                        {faq.question}
+                      </h3>
+                      <div className="flex-shrink-0">
+                        <Plus className="w-6 h-6 text-blue-600" />
+                      </div>
                     </div>
+                    <p className="text-gray-600 mt-3 pr-4">
+                      {faq.answer}
+                    </p>
                   </div>
                 ))}
               </div>
