@@ -8,11 +8,16 @@ export const dynamic = "force-dynamic";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { VideoThumbnail } from "@/components/video-thumbnail";
-import { VideoProgressBar } from "@/components/video-progress-bar";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, Trash2, Copy, ExternalLink } from "lucide-react";
 import { getUserInitials } from "@/lib/user-utils";
 import { db } from "@/lib/db";
 import { getCurrentUserWorkspaceId } from "@/lib/server-auth";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { VideoActions } from "../../../components/video-actions";
 
 interface VideoData {
   id: string;
@@ -110,47 +115,49 @@ async function VideoList() {
   return (
     <div className="grid grid-cols-2 xl:grid-cols-3 gap-2">
       {videos.map((video) => (
-        <Link
+        <div
           key={video.id}
-          href={`/watch/${video.id}`}
-          className="p-4 flex flex-col rounded-3xl hover:bg-accent transition-all duration-200"
+          className="p-4 flex flex-col rounded-3xl hover:bg-accent transition-all duration-200 relative"
         >
-          <VideoThumbnail
-            videoUrl={video.videoUrl}
-            title={video.title}
-            duration={video.duration}
-            thumbnailUrl={video.thumbnailUrl}
-          />
+          <Link href={`/watch/${video.id}`} className="block">
+            <VideoThumbnail
+              videoUrl={video.videoUrl}
+              title={video.title}
+              duration={video.duration}
+              thumbnailUrl={video.thumbnailUrl}
+            />
+          </Link>
           <div className="gap-1 w-full">
-            {" "}
             <div className="flex justify-between items-center">
-              <h4 className="text-lg font-medium">{video.title}</h4>
+              <Link href={`/watch/${video.id}`} className="flex-1">
+                <h4 className="text-lg font-medium hover:text-primary transition-colors">{video.title}</h4>
+              </Link>
               <div className="flex items-center gap-2">
                 <p className="text-sm text-muted-foreground">
                   {video.views} views
                 </p>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Ellipsis />
-                </Button>
+                <VideoActions video={video} />
               </div>
             </div>
-            <div className="flex gap-2">
-              <Avatar>
-                <AvatarFallback>
-                  {getUserInitials(video.user.name || "Unknown User")}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <p className="text-sm text-muted-foreground">
-                  {video.user.name || "Unknown User"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {formatTimeAgo(video.createdAt)}
-                </p>
+            <Link href={`/watch/${video.id}`} className="block">
+              <div className="flex gap-2">
+                <Avatar>
+                  <AvatarFallback>
+                    {getUserInitials(video.user.name || "Unknown User")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <p className="text-sm text-muted-foreground">
+                    {video.user.name || "Unknown User"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatTimeAgo(video.createdAt)}
+                  </p>
+                </div>
               </div>
-            </div>
+            </Link>
           </div>
-        </Link>
+        </div>
       ))}
     </div>
   );
@@ -159,7 +166,6 @@ async function VideoList() {
 export default function page() {
   return (
     <div className="container">
-      <VideoProgressBar />
       <VideoList />
     </div>
   );
