@@ -1,107 +1,30 @@
+"use client";
+
 // Hooks & Next
+import { useVideos } from "@/hooks/use-videos";
 import Link from "next/link";
 
-// Force dynamic rendering for this page since it uses cookies
-export const dynamic = "force-dynamic";
-
 // Components
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { VideoThumbnail } from "@/components/video-thumbnail";
-import { Ellipsis, Trash2, Copy, ExternalLink } from "lucide-react";
 import { getUserInitials } from "@/lib/user-utils";
-import { db } from "@/lib/db";
-import { getCurrentUserWorkspaceId } from "@/lib/server-auth";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { VideoActions } from "../../../components/video-actions";
+import { VideoListActions } from "./video-actions";
 
-interface VideoData {
-  id: string;
-  title: string;
-  videoUrl: string;
-  thumbnailUrl: string | null;
-  duration: number | null;
-  views: number;
-  createdAt: Date;
-  updatedAt: Date;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-  workspace: {
-    id: string;
-    name: string;
-  };
-}
+import Loading from "./loading";
+import Error from "./error";
 
-async function getVideos(): Promise<VideoData[]> {
-  try {
-    // Get current user's active workspace
-    const activeWorkspaceId = await getCurrentUserWorkspaceId();
+function VideoList() {
+  const { data: videos, isLoading, isError } = useVideos();
 
-    // If no active workspace, return empty array
-    if (!activeWorkspaceId) {
-      return [];
-    }
-
-    const videos = await db.video.findMany({
-      where: {
-        workspaceId: activeWorkspaceId,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        workspace: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return videos;
-  } catch (error) {
-    console.error("Error fetching videos:", error);
-    throw new Error("Failed to fetch videos");
+  if (isLoading) {
+    return <Loading />;
   }
-}
 
-function formatTimeAgo(date: Date): string {
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) {
-    return "few seconds ago";
-  } else if (diffInSeconds < 3600) {
-    const minutes = Math.floor(diffInSeconds / 60);
-    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  } else if (diffInSeconds < 86400) {
-    const hours = Math.floor(diffInSeconds / 3600);
-    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  } else {
-    const days = Math.floor(diffInSeconds / 86400);
-    return `${days} day${days > 1 ? "s" : ""} ago`;
+  if (isError) {
+    return <Error />;
   }
-}
 
-async function VideoList() {
-  const videos = await getVideos();
-
-  if (videos.length === 0) {
+  if (!videos || videos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <h3 className="text-xl font-semibold mb-2">No videos yet</h3>
@@ -130,13 +53,16 @@ async function VideoList() {
           <div className="gap-1 w-full">
             <div className="flex justify-between items-center">
               <Link href={`/watch/${video.id}`} className="flex-1">
-                <h4 className="text-lg font-medium hover:text-primary transition-colors">{video.title}</h4>
+                <h4 className="text-lg font-medium hover:text-primary transition-colors">
+                  {video.title}
+                </h4>
               </Link>
               <div className="flex items-center gap-2">
                 <p className="text-sm text-muted-foreground">
-                  {video.views} views
+                  {/* {video.views} views */}
                 </p>
-                <VideoActions video={video} />
+                {/* <VideoActions video={video} /> */}
+                <VideoListActions video={video} />
               </div>
             </div>
             <Link href={`/watch/${video.id}`} className="block">
@@ -150,9 +76,7 @@ async function VideoList() {
                   <p className="text-sm text-muted-foreground">
                     {video.user.name || "Unknown User"}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatTimeAgo(video.createdAt)}
-                  </p>
+                  <p className="text-sm text-muted-foreground"></p>
                 </div>
               </div>
             </Link>

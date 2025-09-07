@@ -139,9 +139,9 @@ export default function HomePage() {
               </h2>
               <p className="sm:text-lg">
                 Instantly share your recordings with secure links. Whether
-                itdon&apos;ts a quick demo for your team, a tutorial for
-                clients, or feedback for stakeholders—your content reaches the
-                right people at the right time.
+                it&apos;s a quick demo for your team, a tutorial for clients, or
+                feedback for stakeholders—your content reaches the right people
+                at the right time.
               </p>
               <Link
                 href="/signup"

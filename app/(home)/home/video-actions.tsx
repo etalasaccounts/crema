@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { useDeleteVideo } from "@/hooks/use-videos";
+
+// Components
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -14,36 +18,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Ellipsis, Trash2, Link2 } from "lucide-react";
-import { useDeleteVideo } from "@/hooks/use-delete-video";
-import { useState } from "react";
+import { Ellipsis, Trash2, Link2, Loader } from "lucide-react";
+
 import { toast } from "sonner";
+import { Video } from "@/interfaces/videos";
 
-interface VideoData {
-  id: string;
-  title: string;
-  videoUrl: string;
-  thumbnailUrl: string | null;
-  duration: number | null;
-  views: number;
-  createdAt: Date;
-  updatedAt: Date;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-  workspace: {
-    id: string;
-    name: string;
-  };
+interface VideoListActionsProps {
+  video: Video;
 }
 
-interface VideoActionsProps {
-  video: VideoData;
-}
-
-export function VideoActions({ video }: VideoActionsProps) {
+export function VideoListActions({ video }: VideoListActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const deleteVideoMutation = useDeleteVideo();
@@ -72,8 +56,11 @@ export function VideoActions({ video }: VideoActionsProps) {
   };
 
   const handleDeleteConfirm = () => {
-    deleteVideoMutation.mutate(video.id);
-    setShowDeleteDialog(false);
+    deleteVideoMutation.mutate(video.id, {
+      onSuccess: () => {
+        setShowDeleteDialog(false);
+      },
+    });
   };
 
   return (
@@ -116,8 +103,7 @@ export function VideoActions({ video }: VideoActionsProps) {
               onClick={handleDeleteClick}
               disabled={deleteVideoMutation.isPending}
             >
-              <Trash2 className="h-4 w-4" />
-              {deleteVideoMutation.isPending ? "Deleting..." : "Delete video"}
+              <Trash2 className="h-4 w-4" /> Delete video
             </Button>
           </div>
         </PopoverContent>
@@ -146,7 +132,14 @@ export function VideoActions({ video }: VideoActionsProps) {
               disabled={deleteVideoMutation.isPending}
               className="bg-red-600 hover:bg-red-700"
             >
-              {deleteVideoMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteVideoMutation.isPending ? (
+                <>
+                  <Loader className="h-4 w-4 mr-2 animate-spin [animation-duration:600ms]" />
+                  "Deleting..."
+                </>
+              ) : (
+                "Delete video"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

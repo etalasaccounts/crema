@@ -1,58 +1,10 @@
+import { getVideo } from "@/lib/db/videos";
 import { EnhancedVideoPlayer } from "@/components/enhanced-video-player";
-import ToolbarSection from "./toolbar";
-import TitleSection from "./title";
-import { db } from "@/lib/db";
+import { ToolbarSection } from "./toolbar";
+import TitleSection from "./info-section";
 import { notFound } from "next/navigation";
 
-interface VideoData {
-  id: string;
-  title: string;
-  videoUrl: string;
-  duration: number | null;
-  views: number;
-  createdAt: Date;
-  updatedAt: Date;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-  workspace: {
-    id: string;
-    name: string;
-  };
-}
-
-async function getVideo(id: string): Promise<VideoData> {
-  const video = await db.video.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-      workspace: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-    },
-  });
-
-  if (!video) {
-    notFound();
-  }
-
-  return video;
-}
-
-export default async function page({
+export default async function WatchPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -60,21 +12,9 @@ export default async function page({
   const { id } = await params;
   const video = await getVideo(id);
 
-  // Check if video is still being processed (no URL yet)
-  const isProcessing = !video.videoUrl || video.videoUrl === "";
-
-  // Transform the video data to match the expected format
-  const transformedVideo = {
-    id: parseInt(video.id),
-    title: video.title,
-    video_url: video.videoUrl,
-    user: {
-      name: video.user.name || "Unknown User",
-    },
-    workspace: video.workspace.name,
-    views: video.views || 0,
-    viewers: [], // We don't have viewers tracking yet
-  };
+  if (!video) {
+    notFound();
+  }
 
   return (
     <div className="flex flex-col max-w-5xl mx-auto gap-5">
@@ -83,17 +23,19 @@ export default async function page({
         url={`${
           process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
         }/watch/${id}`}
+        viewerCount={0}
       />
 
       {/* Video Player */}
       <EnhancedVideoPlayer
-        src={transformedVideo.video_url}
+        src={video.videoUrl}
         duration={video.duration ?? undefined}
-        isProcessing={isProcessing}
+        isProcessing={false}
+        videoId={id}
       />
 
       {/* Title */}
-      <TitleSection video={transformedVideo} />
+      <TitleSection video={video} />
     </div>
   );
 }

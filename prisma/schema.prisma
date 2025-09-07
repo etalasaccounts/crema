@@ -15,26 +15,27 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(uuid())
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  email             String   @unique
-  password          String
-  name              String
-  phone             String
-  avatarUrl         String?
-  activeWorkspaceId String?
+  id                  String      @id @default(uuid())
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  email               String      @unique
+  password            String
+  name                String
+  phone               String
+  avatarUrl           String?
+  activeWorkspaceId   String?
   // Google OAuth fields for Drive access
-  googleAccessToken String?
-  googleRefreshToken String?
-  googleTokenExpiry DateTime?
+  googleAccessToken   String?
+  googleRefreshToken  String?
+  googleTokenExpiry   DateTime?
   // Dropbox OAuth fields for file storage
-  dropboxAccessToken String?
+  dropboxAccessToken  String?
   dropboxRefreshToken String?
-  dropboxTokenExpiry DateTime?
-  workspaces        Workspace[]
-  activeWorkspace   Workspace? @relation("UserActiveWorkspace", fields: [activeWorkspaceId], references: [id])
-  videos            Video[]
+  dropboxTokenExpiry  DateTime?
+  workspaces          Workspace[]
+  activeWorkspace     Workspace?  @relation("UserActiveWorkspace", fields: [activeWorkspaceId], references: [id])
+  videos              Video[]
+  videoViews          VideoView[]
 
   @@map("users")
 }
@@ -56,21 +57,35 @@ model Workspace {
 }
 
 model Video {
-  id          String    @id @default(uuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  title       String
-  videoUrl    String
-  thumbnailUrl String?  // URL to the video thumbnail
-  duration    Float?    // Duration in seconds
-  views       Int       @default(0)
-  source      Source?   // Source of the video (Dropbox, Local, etc.)
-  userId      String
-  workspaceId String
-  user        User      @relation(fields: [userId], references: [id])
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  id           String      @id @default(uuid())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  title        String
+  videoUrl     String
+  thumbnailUrl String? // URL to the video thumbnail
+  duration     Float? // Duration in seconds
+  source       Source? // Source of the video (Dropbox, Local, etc.)
+  userId       String
+  workspaceId  String
+  user         User        @relation(fields: [userId], references: [id])
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id])
+  videoViews   VideoView[]
 
   @@map("videos")
+}
+
+model VideoView {
+  id        String   @id @default(uuid())
+  videoId   String
+  userId    String?
+  sessionId String?  // For tracking unauthenticated users
+  viewedAt  DateTime @default(now())
+  video     Video    @relation(fields: [videoId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@unique([videoId, userId, sessionId]) // Ensure uniqueness
+  @@index([videoId, viewedAt])
+  @@map("video_views")
 }
 
 enum Source {

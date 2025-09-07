@@ -26,6 +26,7 @@ interface VideoPlayerProps {
   onVideoEnded?: () => void;
   className?: string;
   isProcessing?: boolean; // New prop to indicate if video is still being processed
+  videoId?: string; // For tracking views
 }
 
 export function EnhancedVideoPlayer({
@@ -34,6 +35,7 @@ export function EnhancedVideoPlayer({
   onVideoEnded,
   className = "",
   isProcessing = false,
+  videoId,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);

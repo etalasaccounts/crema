@@ -1,3 +1,5 @@
+import { getVideos } from "@/lib/db/videos";
+
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { generateVideoTitleWithTimestamp } from "@/lib/video-utils";
@@ -22,35 +24,9 @@ const updateVideoUrlSchema = z.object({
 
 export async function GET() {
   try {
-    // Fetch all videos from the database
-    const videos = await db.video.findMany({
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        workspace: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      videos,
-    });
+    const videos = await getVideos();
+    return NextResponse.json(videos);
   } catch (error) {
-    console.error("Error fetching videos:", error);
-
     return NextResponse.json(
       {
         success: false,

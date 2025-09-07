@@ -1,63 +1,96 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+// Hooks & Next
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
-interface VideoData {
-  id: string;
-  title: string;
-  videoUrl: string;
-  thumbnailUrl: string | null;
-  duration: number | null;
-  views: number;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-  workspace: {
-    id: string;
-    name: string;
-  };
-}
+// Components
+import { toast } from "sonner";
 
-interface VideosResponse {
-  success: boolean;
-  videos: VideoData[];
-  error?: string;
-}
+// Interfaces
+import { Video } from "@/interfaces/videos";
 
-const fetchVideos = async (): Promise<VideoData[]> => {
-  const response = await fetch("/api/videos", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
+// API
+export const useVideos = () => {
+  return useQuery<Video[]>({
+    queryKey: ["videos"],
+    queryFn: async () => {
+      const response = await fetch("/api/videos");
+      if (!response.ok) {
+        throw new Error("Failed to fetch videos");
+      }
+      return response.json();
     },
   });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch videos");
-  }
-
-  const data: VideosResponse = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.error || "Failed to fetch videos");
-  }
-
-  return data.videos;
 };
 
-export const useVideos = () => {
-  return useQuery({
-    queryKey: ["videos"],
-    queryFn: fetchVideos,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: (failureCount, error) => {
-      // Retry up to 3 times for network errors
-      return failureCount < 3;
+export const useDeleteVideo = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/videos/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete video");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate and refetch videos list
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      toast("Video deleted successfully");
+      router.refresh();
+    },
+    onError: (error) => {
+      console.error("Error deleting video:", error);
+      toast("Failed to delete video");
+    },
+  });
+};
+
+export const useVideo = (id: string) => {
+  return useQuery<Video>({
+    queryKey: ["video", id],
+    queryFn: async () => {
+      const response = await fetch(`/api/videos/${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch video");
+      }
+      return response.json();
+    },
+  });
+};
+
+export const useAddVideoView = () => {
+  return useMutation({
+    mutationFn: async (data: {
+      videoId: string;
+      userId?: string;
+      sessionId?: string;
+    }) => {
+      const response = await fetch("/api/video-views", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to add video view");
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log("Video view added successfully:", data.message);
+    },
+    onError: (error) => {
+      console.error("Error adding video view:", error);
     },
   });
 };
