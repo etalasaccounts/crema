@@ -9,7 +9,6 @@ import { toast } from "sonner";
 
 // Interfaces
 import { Video } from "@/interfaces/videos";
-import { use } from "react";
 
 // API
 export const useVideos = () => {

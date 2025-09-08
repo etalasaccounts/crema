@@ -2,6 +2,7 @@ import { getVideo } from "@/lib/db/videos";
 import { EnhancedVideoPlayer } from "@/components/enhanced-video-player";
 import { ToolbarSection } from "./toolbar";
 import TitleSection from "./info-section";
+import { CommentSection } from "@/components/comment-section";
 import { notFound } from "next/navigation";
 
 export default async function WatchPage({
@@ -36,6 +37,9 @@ export default async function WatchPage({
 
       {/* Title */}
       <TitleSection video={video} />
+
+      {/* Comments */}
+      <CommentSection videoId={id} />
     </div>
   );
 }

@@ -13,7 +13,10 @@ interface ToolbarSectionInterface {
   viewerCount?: number;
 }
 
-export function ToolbarSection({ url, viewerCount = 0 }: ToolbarSectionInterface) {
+export function ToolbarSection({
+  url,
+  viewerCount = 0,
+}: ToolbarSectionInterface) {
   const router = useRouter();
   return (
     <div className="flex gap-2 justify-between">
@@ -27,15 +30,9 @@ export function ToolbarSection({ url, viewerCount = 0 }: ToolbarSectionInterface
       >
         <ChevronLeft /> Home
       </Button>
-      
+
       {/* Viewer count and Share */}
       <div className="flex gap-2 items-center">
-        {/* Viewer count */}
-        <div className="flex items-center gap-1 text-sm text-gray-600 bg-gray-100 px-3 py-2 rounded-full">
-          <Users className="w-4 h-4" />
-          <span>{viewerCount} viewer{viewerCount !== 1 ? 's' : ''}</span>
-        </div>
-        
         {/* Share */}
         <Button
           variant={"secondary"}

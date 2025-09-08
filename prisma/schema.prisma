@@ -36,6 +36,7 @@ model User {
   activeWorkspace     Workspace?  @relation("UserActiveWorkspace", fields: [activeWorkspaceId], references: [id])
   videos              Video[]
   videoViews          VideoView[]
+  comments            Comment[]
 
   @@map("users")
 }
@@ -70,6 +71,7 @@ model Video {
   user         User        @relation(fields: [userId], references: [id])
   workspace    Workspace   @relation(fields: [workspaceId], references: [id])
   videoViews   VideoView[]
+  comments     Comment[]
 
   @@map("videos")
 }
@@ -86,6 +88,23 @@ model VideoView {
   @@unique([videoId, userId, sessionId]) // Ensure uniqueness
   @@index([videoId, viewedAt])
   @@map("video_views")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  videoId   String
+  parentId  String? // For replies to comments
+
+  user      User    @relation(fields: [userId], references: [id])
+  video     Video   @relation(fields: [videoId], references: [id])
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+
+  @@map("comments")
 }
 
 enum Source {
