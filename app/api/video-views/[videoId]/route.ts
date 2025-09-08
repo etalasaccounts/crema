@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { videoId: string } }
+  request: Request,
+  { params }: { params: Promise<{ videoId: string }> }
 ) {
   try {
-    const { videoId } = params;
+    const { videoId } = await params;
 
     if (!videoId) {
       return NextResponse.json(

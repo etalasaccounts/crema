@@ -58,3 +58,14 @@ export async function deleteVideo(id: string) {
     },
   });
 }
+
+export async function updateVideoTitle(id: string, title: string) {
+  return db.video.update({
+    where: {
+      id,
+    },
+    data: {
+      title,
+    },
+  });
+}

@@ -21,10 +21,11 @@ export default function HomePage() {
             SCREEN RECORDER
           </p>
           <div className="text-5xl sm:text-6xl lg:text-8xl font-bold text-neutral-50 leading-tight">
-            Share your work, even itdon&apos;ts
+            Share your work, even it&apos;s
             <span>
               <ContainerTextFlip
                 words={["undone", "messy", "look bad", "unfinished"]}
+                className="ml-4"
               />
             </span>
           </div>

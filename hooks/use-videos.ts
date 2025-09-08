@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 // Interfaces
 import { Video } from "@/interfaces/videos";
+import { use } from "react";
 
 // API
 export const useVideos = () => {
@@ -91,6 +92,40 @@ export const useAddVideoView = () => {
     },
     onError: (error) => {
       console.error("Error adding video view:", error);
+    },
+  });
+};
+
+export const useUpdateVideoTitle = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { videoId: string; title: string }) => {
+      const response = await fetch(`/api/videos/${data.videoId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update video title");
+      }
+
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch the specific video
+      queryClient.invalidateQueries({ queryKey: ["video", variables.videoId] });
+      // Also invalidate the videos list
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      toast("Video title updated successfully");
+    },
+    onError: (error) => {
+      console.error("Error updating video title:", error);
+      toast("Failed to update video title");
     },
   });
 };
