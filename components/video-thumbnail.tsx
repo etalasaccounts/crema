@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
@@ -155,7 +153,7 @@ export function VideoThumbnail({
 
   return (
     <div
-      className={`relative aspect-video rounded-2xl overflow-hidden group ${className}`}
+      className={`relative aspect-video rounded-lg overflow-hidden group ${className}`}
     >
       {/* Hidden video element for thumbnail generation */}
       <video

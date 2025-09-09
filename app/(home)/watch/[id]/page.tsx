@@ -1,17 +1,35 @@
-import { getVideo } from "@/lib/db/videos";
+"use client";
+
+import { useVideoWithComments } from "@/hooks/use-videos";
 import { EnhancedVideoPlayer } from "@/components/enhanced-video-player";
 import { ToolbarSection } from "./toolbar";
 import TitleSection from "./info-section";
-import { CommentSection } from "@/components/comment-section";
+import { CommentSection } from "@/app/(home)/watch/[id]/comment-section";
 import { notFound } from "next/navigation";
+import { use } from "react";
 
-export default async function WatchPage({
+export default function WatchPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const video = await getVideo(id);
+  const { id } = use(params);
+  const { data: video, isLoading, error } = useVideoWithComments(id);
+
+  if (error) {
+    notFound();
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col max-w-5xl mx-auto gap-5">
+        <div className="h-8 bg-muted rounded animate-pulse" />
+        <div className="aspect-video bg-muted rounded animate-pulse" />
+        <div className="h-20 bg-muted rounded animate-pulse" />
+        <div className="h-40 bg-muted rounded animate-pulse" />
+      </div>
+    );
+  }
 
   if (!video) {
     notFound();
@@ -39,7 +57,11 @@ export default async function WatchPage({
       <TitleSection video={video} />
 
       {/* Comments */}
-      <CommentSection videoId={id} />
+      <CommentSection
+        videoId={id}
+        comments={video.comments}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

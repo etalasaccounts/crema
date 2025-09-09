@@ -1,28 +1,10 @@
 "use client";
 
 // Hooks & Next
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Components
 import { toast } from "sonner";
-
-// Interfaces
-import { Comment } from "@/interfaces/comment";
-
-// API
-export const useComments = (videoId: string) => {
-  return useQuery<Comment[]>({
-    queryKey: ["comments", videoId],
-    queryFn: async () => {
-      const response = await fetch(`/api/videos/${videoId}/comments`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch comments");
-      }
-      const data = await response.json();
-      return data.comments;
-    },
-  });
-};
 
 export const useCreateComment = (videoId: string) => {
   const queryClient = useQueryClient();
@@ -45,8 +27,8 @@ export const useCreateComment = (videoId: string) => {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate and refetch comments for this video
-      queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
+      // Invalidate and refetch video with comments
+      queryClient.invalidateQueries({ queryKey: ["video", videoId, "with-comments"] });
       toast("Comment added successfully");
     },
     onError: (error) => {
@@ -77,8 +59,8 @@ export const useReplyToComment = (videoId: string) => {
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate and refetch comments for this video
-      queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
+      // Invalidate and refetch video with comments
+      queryClient.invalidateQueries({ queryKey: ["video", videoId, "with-comments"] });
       toast("Reply added successfully");
     },
     onError: (error) => {

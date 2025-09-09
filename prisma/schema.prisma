@@ -21,7 +21,7 @@ model User {
   email               String      @unique
   password            String
   name                String
-  phone               String
+  phone               String?
   avatarUrl           String?
   activeWorkspaceId   String?
   // Google OAuth fields for Drive access

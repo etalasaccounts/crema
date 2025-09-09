@@ -1,20 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { z } from 'zod';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET!;
+
+interface JWTPayload {
+  userId: string;
+  email: string;
+  iat: number;
+  exp: number;
+}
 
 // Validation schema for profile updates
 const profileUpdateSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
-  phone: z.string().optional(),
+  phone: z.string().optional().transform(val => val === '' ? undefined : val),
 });
 
 export async function PUT(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // Check authentication using JWT token from cookie
+    const token = request.cookies.get('auth-token')?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Verify and decode JWT token
+    let decoded: JWTPayload;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    } catch (jwtError) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -27,10 +47,10 @@ export async function PUT(request: NextRequest) {
 
     // Update user profile in database
     const updatedUser = await db.user.update({
-      where: { id: session.user.id },
+      where: { id: decoded.userId },
       data: {
         name: validatedData.name,
-        ...(validatedData.phone && { phone: validatedData.phone }),
+        phone: validatedData.phone,
       },
       select: {
         id: true,
@@ -65,9 +85,21 @@ export async function PUT(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    // Check authentication using JWT token from cookie
+    const token = request.cookies.get('auth-token')?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Verify and decode JWT token
+    let decoded: JWTPayload;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    } catch (jwtError) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -76,7 +108,7 @@ export async function GET(request: NextRequest) {
 
     // Get user profile from database
     const user = await db.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: decoded.userId },
       select: {
         id: true,
         name: true,

@@ -40,7 +40,7 @@ function VideoList() {
       {videos.map((video) => (
         <div
           key={video.id}
-          className="p-4 flex flex-col rounded-3xl hover:bg-accent transition-all duration-200 relative"
+          className="p-4 flex flex-col rounded-2xl hover:bg-accent transition-all duration-200 relative"
         >
           <Link href={`/watch/${video.id}`} className="block">
             <VideoThumbnail

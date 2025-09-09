@@ -1,4 +1,4 @@
-import { getVideo, deleteVideo, updateVideoTitle } from "@/lib/db/videos";
+import { getVideo, deleteVideo, updateVideoTitle, getVideoWithComments } from "@/lib/db/videos";
 import { NextResponse } from "next/server";
 
 // Type
@@ -28,7 +28,16 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const video = await getVideo(id);
+    const url = new URL(request.url);
+    const includeComments = url.searchParams.get('includeComments') === 'true';
+    
+    let video;
+    if (includeComments) {
+      video = await getVideoWithComments(id);
+    } else {
+      video = await getVideo(id);
+    }
+    
     return NextResponse.json({ success: true, video });
   } catch (error) {
     return NextResponse.json({ error: "Failed to get video" }, { status: 500 });

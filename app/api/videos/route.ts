@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { generateVideoTitleWithTimestamp } from "@/lib/video-utils";
 import { z } from "zod";
 
+import { getCurrentUser } from "@/lib/server-auth";
+
 // Schema for creating a video
 const createVideoSchema = z.object({
   videoUrl: z.string().url("Invalid video URL").optional(),
@@ -24,7 +26,18 @@ const updateVideoUrlSchema = z.object({
 
 export async function GET() {
   try {
-    const videos = await getVideos();
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "User not authenticated",
+        },
+        { status: 401 }
+      );
+    }
+    const videos = await getVideos(user.id);
     return NextResponse.json(videos);
   } catch (error) {
     return NextResponse.json(

@@ -88,10 +88,10 @@ function Navbar({ className }: { className?: string }) {
                 </PopoverTrigger>
                 <PopoverContent
                   align="end"
-                  className="w-40 p-5 bg-background rounded-3xl"
+                  className="w-40 p-2 bg-background rounded-2xl"
                 >
                   <div className="space-y-2 text-white">
-                    <div className="space-y-2">
+                    <div className="p-2 space-y-2">
                       <h4 className="font-medium text-sm leading-none">
                         {user.name}
                       </h4>
@@ -103,21 +103,21 @@ function Navbar({ className }: { className?: string }) {
                     <div className="space-y-1">
                       <Button
                         variant="ghost"
-                        className="w-full justify-start px-2"
+                        className="w-full justify-start px-2 hover:bg-white/10 hover:text-neutral-100"
                         onClick={() => router.push("/account")}
                       >
                         Account
                       </Button>
                       <Button
                         variant="ghost"
-                        className="w-full justify-start px-2"
+                        className="w-full justify-start px-2 hover:bg-white/10 hover:text-neutral-100"
                         onClick={() => router.push("/billing")}
                       >
                         Billing
                       </Button>
                       <Button
                         variant="ghost"
-                        className="w-full justify-start px-2"
+                        className="w-full justify-start px-2 hover:bg-white/10 hover:text-neutral-100"
                         onClick={handleLogout}
                       >
                         Log out

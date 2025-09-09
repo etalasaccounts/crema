@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { useComments, useCreateComment, useReplyToComment } from "@/hooks/use-comments";
+import { useCreateComment, useReplyToComment } from "@/hooks/use-comments";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MessageCircle, Reply } from "lucide-react";
-import { Comment } from "@/interfaces/comment";
+import { VideoComment } from "@/interfaces/videos";
 import { formatDistanceToNow } from "date-fns";
 
 interface CommentSectionProps {
   videoId: string;
+  comments?: VideoComment[];
+  isLoading?: boolean;
 }
 
 interface CommentItemProps {
-  comment: Comment;
+  comment: VideoComment;
   videoId: string;
   onReply?: (commentId: string) => void;
 }
@@ -54,7 +56,9 @@ function CommentItem({ comment, videoId, onReply }: CommentItemProps) {
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm">{comment.user.name}</span>
             <span className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+              {formatDistanceToNow(new Date(comment.createdAt), {
+                addSuffix: true,
+              })}
             </span>
           </div>
           <p className="text-sm">{comment.content}</p>
@@ -116,7 +120,9 @@ function CommentItem({ comment, videoId, onReply }: CommentItemProps) {
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-xs">{reply.user.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(reply.createdAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(reply.createdAt), {
+                      addSuffix: true,
+                    })}
                   </span>
                 </div>
                 <p className="text-xs">{reply.content}</p>
@@ -129,9 +135,12 @@ function CommentItem({ comment, videoId, onReply }: CommentItemProps) {
   );
 }
 
-export function CommentSection({ videoId }: CommentSectionProps) {
+export function CommentSection({
+  videoId,
+  comments = [],
+  isLoading = false,
+}: CommentSectionProps) {
   const [newComment, setNewComment] = useState("");
-  const { data: comments, isLoading, error } = useComments(videoId);
   const createCommentMutation = useCreateComment(videoId);
 
   const handleSubmitComment = async () => {
@@ -147,81 +156,66 @@ export function CommentSection({ videoId }: CommentSectionProps) {
     }
   };
 
-  if (error) {
-    return (
+  return (
+    <>
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <MessageCircle className="h-5 w-5" />
+        <h3 className="font-semibold">{comments?.length || 0} Comments</h3>
+      </div>
+
+      {/* New Comment Form */}
+      <div className="space-y-3">
+        <Textarea
+          placeholder="Add a comment..."
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          className="min-h-[100px] resize-none"
+        />
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSubmitComment}
+            disabled={!newComment.trim() || createCommentMutation.isPending}
+          >
+            {createCommentMutation.isPending ? "Posting..." : "Comment"}
+          </Button>
+        </div>
+      </div>
       <Card>
-        <CardContent className="p-6">
-          <p className="text-center text-muted-foreground">
-            Failed to load comments. Please try again later.
-          </p>
+        <CardContent className="p-6 space-y-6">
+          {/* Comments List */}
+          <div className="space-y-6">
+            {isLoading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="h-8 w-8 bg-muted rounded-full animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-muted rounded animate-pulse w-1/4" />
+                      <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : comments && comments.length > 0 ? (
+              comments.map((comment) => (
+                <CommentItem
+                  key={comment.id}
+                  comment={comment}
+                  videoId={videoId}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  No comments yet. Be the first to comment!
+                </p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardContent className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5" />
-          <h3 className="font-semibold">
-            {comments?.length || 0} Comments
-          </h3>
-        </div>
-
-        {/* New Comment Form */}
-        <div className="space-y-3">
-          <Textarea
-            placeholder="Add a comment..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="min-h-[100px] resize-none"
-          />
-          <div className="flex justify-end">
-            <Button
-              onClick={handleSubmitComment}
-              disabled={!newComment.trim() || createCommentMutation.isPending}
-            >
-              {createCommentMutation.isPending ? "Posting..." : "Comment"}
-            </Button>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Comments List */}
-        <div className="space-y-6">
-          {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="h-8 w-8 bg-muted rounded-full animate-pulse" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-muted rounded animate-pulse w-1/4" />
-                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : comments && comments.length > 0 ? (
-            comments.map((comment) => (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                videoId={videoId}
-              />
-            ))
-          ) : (
-            <div className="text-center py-8">
-              <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                No comments yet. Be the first to comment!
-              </p>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    </>
   );
 }

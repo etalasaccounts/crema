@@ -68,6 +68,18 @@ export default function AccountPage() {
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
      const file = event.target.files?.[0];
      if (file) {
+       // Validate file before upload
+       if (!file.type.startsWith('image/')) {
+         toast.error("Please select an image file (JPEG, PNG, GIF, etc.)");
+         return;
+       }
+       
+       // Validate file size (5MB limit)
+       if (file.size > 5 * 1024 * 1024) {
+         toast.error("File size must be less than 5MB");
+         return;
+       }
+       
        setIsUploadingAvatar(true);
        try {
          const formData = new FormData();
@@ -79,19 +91,27 @@ export default function AccountPage() {
          });
 
          if (!response.ok) {
-           throw new Error('Failed to upload avatar');
+           const errorData = await response.json().catch(() => ({}));
+           const errorMessage = errorData.error || 'Failed to upload avatar';
+           throw new Error(errorMessage);
          }
 
          const data = await response.json();
          if (data.avatarUrl) {
            setAvatarUrl(data.avatarUrl);
            toast.success("Avatar updated successfully!");
+         } else {
+           throw new Error('Invalid response from server');
          }
-       } catch (error) {
+       } catch (error: any) {
          console.error('Avatar upload error:', error);
-         toast.error("Failed to upload avatar. Please try again.");
+         toast.error(error.message || "Failed to upload avatar. Please try again.");
        } finally {
          setIsUploadingAvatar(false);
+         // Reset file input to allow uploading the same file again
+         if (fileInputRef.current) {
+           fileInputRef.current.value = '';
+         }
        }
      }
    };

@@ -41,7 +41,9 @@ export async function getCommentsForVideo(videoId: string) {
   });
 }
 
-export async function createComment(data: CreateCommentSchema & { userId: string }) {
+export async function createComment(
+  data: CreateCommentSchema & { userId: string }
+) {
   return db.comment.create({
     data: {
       content: data.content,

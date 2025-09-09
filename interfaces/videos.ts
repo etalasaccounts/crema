@@ -1,3 +1,20 @@
+export interface VideoComment {
+  id: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  videoId: string;
+  parentId: string | null;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    avatarUrl: string | null;
+  };
+  replies?: VideoComment[];
+}
+
 export interface Video {
   id: string;
   title: string;
@@ -18,4 +35,5 @@ export interface Video {
   _count?: {
     videoViews: number;
   };
+  comments?: VideoComment[];
 }

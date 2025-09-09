@@ -120,9 +120,8 @@ export function VideoListActions({ video }: VideoListActionsProps) {
           </DialogHeader>
           <DialogFooter className="gap-2 sm:space-x-0">
             <Button
-              variant="outline"
+              variant="secondary"
               onClick={() => setShowDeleteDialog(false)}
-              className="border-neutral-700 text-neutral-100 hover:bg-neutral-800"
             >
               Cancel
             </Button>
@@ -135,7 +134,7 @@ export function VideoListActions({ video }: VideoListActionsProps) {
               {deleteVideoMutation.isPending ? (
                 <>
                   <Loader className="h-4 w-4 mr-2 animate-spin [animation-duration:600ms]" />
-                  "Deleting..."
+                  Deleting...
                 </>
               ) : (
                 "Delete video"

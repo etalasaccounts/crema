@@ -51,16 +51,38 @@ export const useDeleteVideo = () => {
   });
 };
 
+const fetchVideo = async (id: string) => {
+  const response = await fetch(`/api/videos/${id}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch video");
+  }
+  const data = await response.json();
+  return data.video;
+};
+
+const fetchVideoWithComments = async (id: string) => {
+  const response = await fetch(`/api/videos/${id}?includeComments=true`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch video with comments");
+  }
+  const data = await response.json();
+  return data.video;
+};
+
 export const useVideo = (id: string) => {
-  return useQuery<Video>({
+  return useQuery({
     queryKey: ["video", id],
-    queryFn: async () => {
-      const response = await fetch(`/api/videos/${id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch video");
-      }
-      return response.json();
-    },
+    queryFn: () => fetchVideo(id),
+    enabled: !!id,
+  });
+};
+
+export const useVideoWithComments = (id: string) => {
+  return useQuery({
+    queryKey: ["video", id, "with-comments"],
+    queryFn: () => fetchVideoWithComments(id),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
