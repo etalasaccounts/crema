@@ -22,6 +22,11 @@ const nextConfig = {
         hostname: "*.b-cdn.net",
         port: "",
       },
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+        port: "",
+      },
     ],
   },
 };
