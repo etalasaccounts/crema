@@ -1,9 +1,9 @@
 import { db } from "@/lib/db";
 
-export async function getVideos(userId: string) {
+export async function getVideos(workspaceId: string) {
   return db.video.findMany({
     where: {
-      userId: userId,
+      workspaceId: workspaceId,
     },
     orderBy: {
       createdAt: "desc",

@@ -3,7 +3,7 @@
 // Hooks
 import { useEffect, useRef, useState } from "react";
 import { useAddVideoView, useUpdateVideoTitle } from "@/hooks/use-videos";
-import { useUser } from "@/hooks/use-current-user";
+import { useUser } from "@/hooks/use-auth";
 import { useVideoViewers } from "@/hooks/use-video-viewers";
 
 // Utils
@@ -24,7 +24,7 @@ interface InfoSectionProps {
 function getOrCreateSessionId(): string {
   if (typeof window === "undefined") return "";
 
-  const storageKey = "crema_session_id";
+  const storageKey = "screenbolt_session_id";
   let sessionId = localStorage.getItem(storageKey);
 
   if (!sessionId) {

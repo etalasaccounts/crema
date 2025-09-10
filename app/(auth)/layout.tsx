@@ -15,9 +15,10 @@ export default function AuthLayout({ children }: any) {
   }, []);
 
   // Determine which logo to use
-  const logoSrc = mounted && (resolvedTheme === 'dark' || theme === 'dark') 
-    ? "/assets/crema-logo-negative.png" 
-    : "/assets/crema-logo.png";
+  const logoSrc =
+    mounted && (resolvedTheme === "dark" || theme === "dark")
+      ? "/assets/logo-white.png"
+      : "/assets/logo-black.png";
 
   return (
     <>
@@ -26,10 +27,11 @@ export default function AuthLayout({ children }: any) {
           <Image
             src={logoSrc}
             alt="logo"
-            width={114}
-            height={28}
+            width={160}
+            height={56}
             className="mb-10"
           />
+
           {children}
         </div>
         <AuthFooter />

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Dropbox } from "dropbox";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/hooks/use-auth";
 
 interface DropboxUploadResult {
   url: string;
@@ -46,24 +46,26 @@ export function useDropbox() {
 
       try {
         const dbx = getDropboxClient(accessToken);
-        
-        // Simplified folder structure - just /crema/
-        const basePath = `/crema`;
+
+        // Simplified folder structure - just /screenbolt/
+        const basePath = `/screenbolt`;
         await ensureFolderExists(dbx, basePath);
-        
+
         // Create a unique path for the video
         const path = `${basePath}/${filename}`;
-        
+
         console.log("Uploading file to Dropbox:", path);
         console.log("File size:", file.size, "bytes");
         console.log("File type:", file.type);
-        
+
         // Validate file size (Dropbox has a 150MB limit for direct uploads)
         const MAX_FILE_SIZE = 150 * 1024 * 1024; // 150MB in bytes
         if (file.size > MAX_FILE_SIZE) {
-          throw new Error(`File size (${file.size} bytes) exceeds Dropbox's 150MB limit for direct uploads. Please use a smaller file or implement chunked upload.`);
+          throw new Error(
+            `File size (${file.size} bytes) exceeds Dropbox's 150MB limit for direct uploads. Please use a smaller file or implement chunked upload.`
+          );
         }
-        
+
         // Upload the file
         const response = await dbx.filesUpload({
           path,
@@ -73,7 +75,7 @@ export function useDropbox() {
         });
 
         console.log("File uploaded successfully:", response.result);
-        
+
         // Create a shared link with public visibility
         console.log("Creating shared link for:", response.result.path_display);
         let shareResponse;
@@ -88,17 +90,23 @@ export function useDropbox() {
           });
         } catch (shareError: any) {
           // If sharing fails, try to get an existing shared link
-          console.log("Failed to create shared link, checking for existing links:", shareError);
+          console.log(
+            "Failed to create shared link, checking for existing links:",
+            shareError
+          );
           try {
             const listResponse = await dbx.sharingListSharedLinks({
               path: response.result.path_display as string,
               direct_only: true,
             });
-            
+
             if (listResponse.result.links.length > 0) {
               // Use the first existing link
               shareResponse = { result: listResponse.result.links[0] };
-              console.log("Using existing shared link:", shareResponse.result.url);
+              console.log(
+                "Using existing shared link:",
+                shareResponse.result.url
+              );
             } else {
               // If no existing link, re-throw the original error
               throw shareError;
@@ -134,17 +142,20 @@ export function useDropbox() {
           console.error("Error message:", error.message);
           console.error("Error stack:", error.stack);
         }
-        
+
         // Handle Dropbox-specific errors
         if (error.error) {
-          console.error("Dropbox error details:", JSON.stringify(error.error, null, 2));
+          console.error(
+            "Dropbox error details:",
+            JSON.stringify(error.error, null, 2)
+          );
         }
-        
+
         // Log additional debugging information
         console.error("Error status:", error.status);
         console.error("Error headers:", error.headers);
         console.error("Error response:", error.response);
-        
+
         throw error;
       } finally {
         setIsUploading(false);

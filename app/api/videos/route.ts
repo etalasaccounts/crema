@@ -15,6 +15,7 @@ const createVideoSchema = z.object({
   title: z.string().optional(),
   duration: z.number().positive("Duration must be positive").optional(),
   thumbnailUrl: z.string().url("Invalid thumbnail URL").optional(),
+  source: z.enum(["Dropbox", "Local"]).optional(),
 });
 
 // Schema for updating a video URL
@@ -72,8 +73,8 @@ export async function POST(request: NextRequest) {
         userId: validatedData.userId,
         workspaceId: validatedData.workspaceId,
         duration: validatedData.duration,
-        // Set source as Dropbox if we have a URL, otherwise leave it null
-        source: validatedData.videoUrl ? "Dropbox" : null,
+        // Use provided source or default to Local for Screenbolt storage
+        source: validatedData.source || "Local",
       },
       include: {
         user: {

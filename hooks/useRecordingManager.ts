@@ -10,13 +10,13 @@ import { toast } from "sonner";
 import { useScreenRecording } from "@/hooks/useScreenRecording";
 import { mediaStreamManager } from "@/lib/services/MediaStreamManager";
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/hooks/use-auth";
 import { useDropbox } from "@/hooks/useDropbox";
 import { generateThumbnailFromVideoBlob } from "@/lib/video-utils";
 
 export function useRecordingManager() {
   const dispatch = useAppDispatch();
-  const { isRecording, countdownState, isCountdownPaused, cameraActive } =
+  const { isRecording, countdownState, isCountdownPaused, cameraActive, selectedStorage } =
     useAppSelector((state) => state.media);
   const { user } = useCurrentUser();
   const router = useRouter();
@@ -173,12 +173,14 @@ export function useRecordingManager() {
           );
 
           // Show a loading toast for the create video process
-          const createVideoToast = toast.loading("Processing your recording...");
+          const createVideoToast = toast.loading(
+            "Processing your recording..."
+          );
 
           try {
             // Generate thumbnail from the video blob
             const thumbnailBlob = await generateThumbnailFromVideoBlob(blob);
-            
+
             // If we have a thumbnail, upload it to Bunny.net
             let thumbnailUrl: string | undefined;
             if (thumbnailBlob) {
@@ -188,11 +190,15 @@ export function useRecordingManager() {
                   method: "POST",
                   body: (() => {
                     const formData = new FormData();
-                    formData.append("video", thumbnailBlob, `thumbnail-${Date.now()}.jpg`);
+                    formData.append(
+                      "video",
+                      thumbnailBlob,
+                      `thumbnail-${Date.now()}.jpg`
+                    );
                     return formData;
-                  })()
+                  })(),
                 });
-                
+
                 const thumbnailData = await thumbnailResponse.json();
                 if (thumbnailData.success) {
                   thumbnailUrl = thumbnailData.url;
@@ -213,6 +219,7 @@ export function useRecordingManager() {
                 workspaceId: user.active_workspace,
                 duration: duration > 0 ? duration : undefined,
                 thumbnailUrl, // Include thumbnail URL if available
+                source: selectedStorage === 'dropbox' ? 'Dropbox' : 'Local',
               }),
             });
 
@@ -220,29 +227,31 @@ export function useRecordingManager() {
 
             if (data.success && data.video) {
               toast.dismiss(createVideoToast);
-              
+
               // Redirect to watch page immediately BEFORE uploading
               router.push(`/watch/${data.video.id}`);
-              
-              // Try Dropbox upload
-              try {
-                const tokenResponse = await fetch("/api/auth/dropbox-token");
-                
+
+              // Try Dropbox upload only if user selected Dropbox storage
+              if (selectedStorage === 'dropbox') {
+                try {
+                  const tokenResponse = await fetch("/api/auth/dropbox-token");
+
                 if (tokenResponse.ok) {
                   const tokenData = await tokenResponse.json();
                   const accessToken = tokenData.accessToken;
-                  
+
                   if (accessToken) {
                     // Show upload progress toast
                     toast.loading("Uploading to Dropbox...", {
-                      description: "Please wait while your video is being uploaded...",
-                      id: "dropbox-upload"
+                      description:
+                        "Please wait while your video is being uploaded...",
+                      id: "dropbox-upload",
                     });
 
                     try {
                       // Upload to Dropbox
                       const uploadResult = await uploadToDropbox(
-                        accessToken, 
+                        accessToken,
                         blob,
                         `recording-${Date.now()}.webm`
                       );
@@ -266,36 +275,42 @@ export function useRecordingManager() {
 
                         if (updateData.success) {
                           toast.success("Video uploaded successfully!", {
-                            description: "Your video is now available for viewing.",
-                            id: "dropbox-upload"
+                            description:
+                              "Your video is now available for viewing.",
+                            id: "dropbox-upload",
                           });
                         } else {
                           // Even if we couldn't update the database, the file was uploaded to Dropbox
                           toast.success("Video uploaded to Dropbox!", {
-                            description: "Note: There was an issue updating the database record.",
-                            id: "dropbox-upload"
+                            description:
+                              "Note: There was an issue updating the database record.",
+                            id: "dropbox-upload",
                           });
-                          console.warn("Failed to update video record in database:", updateData.error);
+                          console.warn(
+                            "Failed to update video record in database:",
+                            updateData.error
+                          );
                         }
                       } else {
                         throw new Error("Failed to upload video to Dropbox");
                       }
                     } catch (uploadError: any) {
                       console.error("Dropbox upload error:", uploadError);
-                      
+
                       // Check if it's a specific error we can handle
-                      let errorMessage = "Your video is saved but not uploaded to Dropbox.";
+                      let errorMessage =
+                        "Your video is saved but not uploaded to Dropbox.";
                       if (uploadError.error && uploadError.error.path) {
                         errorMessage = `Dropbox error: ${uploadError.error.path.reason}`;
                       } else if (uploadError.message) {
                         errorMessage = uploadError.message;
                       }
-                      
+
                       toast.error("Upload to Dropbox failed", {
                         description: errorMessage,
-                        id: "dropbox-upload"
+                        id: "dropbox-upload",
                       });
-                      
+
                       // Create a download link for the user
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement("a");
@@ -309,10 +324,11 @@ export function useRecordingManager() {
                   } else {
                     // Dropbox token not available
                     toast.error("Dropbox access not authorized", {
-                      description: "Please authenticate with Dropbox to enable cloud uploads.",
-                      id: "dropbox-upload"
+                      description:
+                        "Please authenticate with Dropbox to enable cloud uploads.",
+                      id: "dropbox-upload",
                     });
-                    
+
                     // Create a download link for the user
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
@@ -327,12 +343,13 @@ export function useRecordingManager() {
                   // Dropbox token API returned error
                   const errorData = await tokenResponse.json();
                   console.error("Dropbox token API error:", errorData);
-                  
+
                   toast.error("Dropbox access error", {
-                    description: errorData.error || "Failed to get Dropbox access token.",
-                    id: "dropbox-upload"
+                    description:
+                      errorData.error || "Failed to get Dropbox access token.",
+                    id: "dropbox-upload",
                   });
-                  
+
                   // Create a download link for the user
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
@@ -343,13 +360,14 @@ export function useRecordingManager() {
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                 }
-              } catch (tokenError) {
+                } catch (tokenError) {
                 console.error("Failed to get Dropbox token:", tokenError);
                 toast.error("Dropbox service unavailable", {
-                  description: "Video saved locally. Dropbox upload temporarily unavailable.",
-                  id: "dropbox-upload"
+                  description:
+                    "Video saved locally. Dropbox upload temporarily unavailable.",
+                  id: "dropbox-upload",
                 });
-                
+
                 // Create a download link for the user
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
@@ -359,6 +377,12 @@ export function useRecordingManager() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+                }
+              } else {
+                // User selected Screenbolt storage - video is already saved in database
+                toast.success("Video saved successfully!", {
+                  description: "Your video is ready for viewing.",
+                });
               }
             } else {
               throw new Error(
@@ -403,14 +427,7 @@ export function useRecordingManager() {
         return false;
       }
     },
-    [
-      isRecording,
-      stopRecording,
-      dispatch,
-      user,
-      router,
-      uploadToDropbox
-    ]
+    [isRecording, stopRecording, dispatch, user, router, uploadToDropbox, selectedStorage, cameraActive, deactivateCamera]
   );
 
   const togglePauseRecording = useCallback(async () => {

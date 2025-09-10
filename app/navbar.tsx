@@ -13,11 +13,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu } from "@/components/ui/navbar-menu";
 import { cn } from "@/lib/utils";
 import { getUserInitials } from "@/lib/user-utils";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 
-export function NavbarDemo() {
+export function NavbarTop() {
   return (
     <div className="relative w-full flex items-center justify-center">
       <Navbar className="top-4 " />
@@ -55,10 +55,10 @@ function Navbar({ className }: { className?: string }) {
         <div className="flex gap-2 w-fit items-center">
           {" "}
           <Image
-            src={"/assets/crema-logo-negative.png"}
+            src={"/assets/logo-white.png"}
             alt="logo"
-            width={114}
-            height={28}
+            width={160}
+            height={80}
             className="cursor-pointer hover:opacity-80 transition-opacity"
             onClick={handleLogoClick}
           />{" "}

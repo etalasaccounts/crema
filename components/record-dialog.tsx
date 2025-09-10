@@ -18,16 +18,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { Mic, MicOff, Video, VideoOff, Cloud, HardDrive } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   setSelectedAudioDevice,
   setSelectedVideoDevice,
+  setSelectedStorage,
   setStandby,
 } from "@/store/slices/mediaSlice";
 import { useMediaRedux } from "@/hooks/use-media-redux";
 import { useRecordingManager } from "@/hooks/useRecordingManager";
+import { useDropboxStatus } from "@/hooks/use-dropbox-status";
 
 interface RecordDialogProps {
   isOpen: boolean;
@@ -52,9 +54,11 @@ export function RecordDialog({
     isStandby,
     isRecording,
     selectedVideoDevice,
+    selectedStorage,
   } = useAppSelector((state) => state.media);
 
   const { startRecordingProcess } = useRecordingManager();
+  const { data: dropboxStatus } = useDropboxStatus();
 
   const {
     checkPermissions,
@@ -129,6 +133,12 @@ export function RecordDialog({
     if (cameraActive) {
       activateCamera(deviceId);
     }
+  };
+
+  // Handle storage selection
+  const handleSelectStorage = (storage: 'screenbolt' | 'dropbox') => {
+    console.log("Selected storage:", storage);
+    dispatch(setSelectedStorage(storage));
   };
 
   // Check if an element is part of the record controls
@@ -222,7 +232,7 @@ export function RecordDialog({
             <DialogTitle>
               <div className="flex gap-2 w-fit items-center">
                 <Image
-                  src={"/assets/crema-logo-negative.png"}
+                  src={"/assets/logo-white.png"}
                   alt="logo"
                   width={80}
                   height={10}
@@ -351,6 +361,38 @@ export function RecordDialog({
                   <VideoOff className="h-5 w-5" />
                 )}
               </Button>
+            </div>
+
+            {/* Storage Section */}
+            <div className="flex flex-row gap-2 items-center">
+              <div className="w-full">
+                <Select
+                  value={selectedStorage}
+                  onValueChange={handleSelectStorage}
+                >
+                  <SelectTrigger className="w-full bg-neutral-800 text-white hover:bg-neutral-700 hover:text-white border-0 px-4 rounded-lg h-10 text-start">
+                    <SelectValue placeholder="Select storage" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="screenbolt">
+                        <div className="flex items-center gap-2">
+                          <HardDrive className="h-4 w-4" />
+                          Screenbolt
+                        </div>
+                      </SelectItem>
+                      {dropboxStatus?.hasAccess && (
+                        <SelectItem value="dropbox">
+                          <div className="flex items-center gap-2">
+                            <Cloud className="h-4 w-4" />
+                            Dropbox
+                          </div>
+                        </SelectItem>
+                      )}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

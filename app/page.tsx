@@ -1,19 +1,95 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { NavbarDemo } from "./navbar";
+import { NavbarTop } from "./navbar";
 import { ContainerTextFlip } from "@/components/ui/container-text-flip";
 import AnimatedGradientBackground from "@/components/magicui/animated-gradient-background";
+import { Suspense, useState } from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+function FAQItems() {
+  const [openItems, setOpenItems] = useState<number[]>([]);
+
+  const toggleItem = (index: number) => {
+    setOpenItems((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
+
+  const faqs = [
+    {
+      question: "How do I start recording my screen with Screenbolt?",
+      answer:
+        "Simply click the record button and select what you want to capture. Screenbolt works instantly in your browser—no downloads or installations required.",
+    },
+    {
+      question: "Can I record audio along with my screen recording?",
+      answer:
+        "Yes! Screenbolt captures both your screen and audio simultaneously. You can record system audio, microphone input, or both depending on your needs.",
+    },
+    {
+      question: "How do I share my recordings after creating them?",
+      answer:
+        "Once your recording is complete, you'll get a secure shareable link instantly. You can also download the video file or integrate with your favorite tools.",
+    },
+    {
+      question: "Is Screenbolt free to use?",
+      answer:
+        "We offer a free tier with basic recording features. For advanced features like longer recordings and team collaboration, check out our premium plans.",
+    },
+    {
+      question: "What browsers and devices does Screenbolt support?",
+      answer:
+        "Screenbolt works on all modern browsers including Chrome, Firefox, Safari, and Edge. It's compatible with Windows, Mac, and Linux systems.",
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {faqs.map((faq, index) => (
+        <Collapsible
+          key={index}
+          open={openItems.includes(index)}
+          onOpenChange={() => toggleItem(index)}
+        >
+          <div className="py-4 border-b border-gray-100 last:border-b-0">
+            <CollapsibleTrigger className="flex items-center justify-between cursor-pointer w-full text-left">
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 pr-4">
+                {faq.question}
+              </h3>
+              <div className="flex-shrink-0">
+                {openItems.includes(index) ? (
+                  <Minus className="w-6 h-6 text-blue-600" />
+                ) : (
+                  <Plus className="w-6 h-6 text-blue-600" />
+                )}
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3">
+              <p className="text-gray-600 pr-4">{faq.answer}</p>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+      ))}
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
     <div className="relative flex flex-col min-h-screen w-full">
       <AnimatedGradientBackground containerStyle={{ zIndex: -50 }} />
 
-      <NavbarDemo />
+      <Suspense fallback={<div className="h-16 bg-muted animate-pulse" />}>
+        <NavbarTop />
+      </Suspense>
       {/* Hero Section */}
       <div className="w-full px-6 pt-40 pb-12">
         <div className="max-w-5xl mx-auto text-center space-y-8">
@@ -30,8 +106,8 @@ export default function HomePage() {
             </span>
           </div>
           <p className="text-xl leading-relaxed max-w-3xl text-neutral-300 mx-auto">
-            With Crema, the journey matters as much as the destination—record
-            it, share it, and keep moving.
+            With Screenbolt, the journey matters as much as the
+            destination—record it, share it, and keep moving.
           </p>
 
           <Link href="/signup">
@@ -116,9 +192,9 @@ export default function HomePage() {
               </h2>
               <p className="sm:text-lg">
                 Start recording instantly with just one click. No complex setup,
-                no technical knowledge required. Crema makes screen recording as
-                simple as pressing a button, so you can focus on what matters
-                most—your work.
+                no technical knowledge required. Screenbolt makes screen
+                recording as simple as pressing a button, so you can focus on
+                what matters most—your work.
               </p>
               <Link
                 href="/signup"
@@ -187,7 +263,7 @@ export default function HomePage() {
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
             Work smarter, not harder
-            <br /> with Crema.
+            <br /> with Screenbolt.
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Experience the freedom of asynchronous communication. Record once,
@@ -280,52 +356,7 @@ export default function HomePage() {
 
             {/* Right - FAQ Items (2/3 width) */}
             <div className="lg:col-span-2 bg-white border border-border rounded-r-3xl lg:rounded-l-none rounded-l-3xl p-8 lg:p-12">
-              <div className="space-y-6">
-                {[
-                  {
-                    question: "How do I start recording my screen with Crema?",
-                    answer:
-                      "Simply click the record button and select what you want to capture. Crema works instantly in your browser—no downloads or installations required.",
-                  },
-                  {
-                    question:
-                      "Can I record audio along with my screen recording?",
-                    answer:
-                      "Yes! Crema captures both your screen and audio simultaneously. You can record system audio, microphone input, or both depending on your needs.",
-                  },
-                  {
-                    question:
-                      "How do I share my recordings after creating them?",
-                    answer:
-                      "Once your recording is complete, you'll get a secure shareable link instantly. You can also download the video file or integrate with your favorite tools.",
-                  },
-                  {
-                    question: "Is Crema free to use?",
-                    answer:
-                      "We offer a free tier with basic recording features. For advanced features like longer recordings and team collaboration, check out our premium plans.",
-                  },
-                  {
-                    question: "What browsers and devices does Crema support?",
-                    answer:
-                      "Crema works on all modern browsers including Chrome, Firefox, Safari, and Edge. It's compatible with Windows, Mac, and Linux systems.",
-                  },
-                ].map((faq, index) => (
-                  <div
-                    key={index}
-                    className="py-4 border-b border-gray-100 last:border-b-0"
-                  >
-                    <div className="flex items-center justify-between cursor-pointer">
-                      <h3 className="text-lg lg:text-xl font-semibold text-gray-900 pr-4">
-                        {faq.question}
-                      </h3>
-                      <div className="flex-shrink-0">
-                        <Plus className="w-6 h-6 text-blue-600" />
-                      </div>
-                    </div>
-                    <p className="text-gray-600 mt-3 pr-4">{faq.answer}</p>
-                  </div>
-                ))}
-              </div>
+              <FAQItems />
             </div>
           </div>
         </div>

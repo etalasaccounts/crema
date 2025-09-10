@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProtectedRouteProps {

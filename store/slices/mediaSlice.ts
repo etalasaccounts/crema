@@ -15,6 +15,7 @@ interface MediaState {
   videoDevices: MediaDevice[];
   selectedAudioDevice: string;
   selectedVideoDevice: string;
+  selectedStorage: 'screenbolt' | 'dropbox';
   isStandby: boolean;
   isRecording: boolean;
   countdownState: 'inactive' | 'standby' | 'rolling' | 'action' | 'recording';
@@ -31,6 +32,7 @@ const initialState: MediaState = {
   videoDevices: [],
   selectedAudioDevice: '',
   selectedVideoDevice: '',
+  selectedStorage: 'screenbolt',
   isStandby: false,
   isRecording: false,
   countdownState: 'inactive',
@@ -68,6 +70,9 @@ export const mediaSlice = createSlice({
     setSelectedVideoDevice: (state, action: PayloadAction<string>) => {
       state.selectedVideoDevice = action.payload;
     },
+    setSelectedStorage: (state, action: PayloadAction<'screenbolt' | 'dropbox'>) => {
+      state.selectedStorage = action.payload;
+    },
     setStandby: (state, action: PayloadAction<boolean>) => {
       state.isStandby = action.payload;
     },
@@ -102,6 +107,7 @@ export const {
   setVideoDevices,
   setSelectedAudioDevice,
   setSelectedVideoDevice,
+  setSelectedStorage,
   setStandby,
   setRecording,
   setCountdownState,
@@ -109,4 +115,4 @@ export const {
   clearMediaState,
 } = mediaSlice.actions;
 
-export default mediaSlice.reducer; 
+export default mediaSlice.reducer;

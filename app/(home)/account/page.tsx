@@ -1,18 +1,24 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/hooks/use-auth";
 import { getUserInitials } from "@/lib/user-utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Camera, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function AccountPage() {
+function AccountContent() {
   const { user, isLoading } = useCurrentUser();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -23,105 +29,109 @@ export default function AccountPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-     if (user) {
-       setName(user.name || "");
-       setEmail(user.email || "");
-       setPhone(user.phone || "");
-       setAvatarUrl(user.avatarUrl || "");
-     }
-   }, [user]);
+    if (user) {
+      setName(user.name || "");
+      setEmail(user.email || "");
+      setPhone(user.phone || "");
+      setAvatarUrl(user.avatarUrl || "");
+    }
+  }, [user]);
 
   const handleSave = async () => {
-     setIsSaving(true);
-     try {
-       const response = await fetch('/api/user/profile', {
-         method: 'PUT',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify({
-           name,
-           phone,
-         }),
-       });
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          phone,
+        }),
+      });
 
-       if (!response.ok) {
-         throw new Error('Failed to update profile');
-       }
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
 
-       const data = await response.json();
-       toast.success("Profile updated successfully!");
-       
-       // Update the user context with new data
-       if (data.user) {
-         setName(data.user.name);
-         setPhone(data.user.phone || "");
-       }
-     } catch (error) {
-       console.error('Profile update error:', error);
-       toast.error("Failed to update profile. Please try again.");
-     } finally {
-       setIsSaving(false);
-     }
-   };
+      const data = await response.json();
+      toast.success("Profile updated successfully!");
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-     const file = event.target.files?.[0];
-     if (file) {
-       // Validate file before upload
-       if (!file.type.startsWith('image/')) {
-         toast.error("Please select an image file (JPEG, PNG, GIF, etc.)");
-         return;
-       }
-       
-       // Validate file size (5MB limit)
-       if (file.size > 5 * 1024 * 1024) {
-         toast.error("File size must be less than 5MB");
-         return;
-       }
-       
-       setIsUploadingAvatar(true);
-       try {
-         const formData = new FormData();
-         formData.append('avatar', file);
+      // Update the user context with new data
+      if (data.user) {
+        setName(data.user.name);
+        setPhone(data.user.phone || "");
+      }
+    } catch (error) {
+      console.error("Profile update error:", error);
+      toast.error("Failed to update profile. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-         const response = await fetch('/api/user/avatar', {
-           method: 'POST',
-           body: formData,
-         });
+  const handleAvatarUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file before upload
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file (JPEG, PNG, GIF, etc.)");
+        return;
+      }
 
-         if (!response.ok) {
-           const errorData = await response.json().catch(() => ({}));
-           const errorMessage = errorData.error || 'Failed to upload avatar';
-           throw new Error(errorMessage);
-         }
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size must be less than 5MB");
+        return;
+      }
 
-         const data = await response.json();
-         if (data.avatarUrl) {
-           setAvatarUrl(data.avatarUrl);
-           toast.success("Avatar updated successfully!");
-         } else {
-           throw new Error('Invalid response from server');
-         }
-       } catch (error: any) {
-         console.error('Avatar upload error:', error);
-         toast.error(error.message || "Failed to upload avatar. Please try again.");
-       } finally {
-         setIsUploadingAvatar(false);
-         // Reset file input to allow uploading the same file again
-         if (fileInputRef.current) {
-           fileInputRef.current.value = '';
-         }
-       }
-     }
-   };
+      setIsUploadingAvatar(true);
+      try {
+        const formData = new FormData();
+        formData.append("avatar", file);
+
+        const response = await fetch("/api/user/avatar", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage = errorData.error || "Failed to upload avatar";
+          throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        if (data.avatarUrl) {
+          setAvatarUrl(data.avatarUrl);
+          toast.success("Avatar updated successfully!");
+        } else {
+          throw new Error("Invalid response from server");
+        }
+      } catch (error: any) {
+        console.error("Avatar upload error:", error);
+        toast.error(
+          error.message || "Failed to upload avatar. Please try again."
+        );
+      } finally {
+        setIsUploadingAvatar(false);
+        // Reset file input to allow uploading the same file again
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    }
+  };
 
   const handleCancel = () => {
-     setName(user?.name || "");
-     setEmail(user?.email || "");
-     setPhone(user?.phone || "");
-     setAvatarUrl(user?.avatarUrl || "");
-   };
+    setName(user?.name || "");
+    setEmail(user?.email || "");
+    setPhone(user?.phone || "");
+    setAvatarUrl(user?.avatarUrl || "");
+  };
 
   if (isLoading) {
     return (
@@ -164,7 +174,7 @@ export default function AccountPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold">Account Settings</h1>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Profile Information</CardTitle>
@@ -233,7 +243,8 @@ export default function AccountPage() {
                   className="bg-muted"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Email cannot be changed. Contact support if you need to update your email.
+                  Email cannot be changed. Contact support if you need to update
+                  your email.
                 </p>
               </div>
 
@@ -263,7 +274,11 @@ export default function AccountPage() {
                   </>
                 )}
               </Button>
-              <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSaving}
+              >
                 Reset
               </Button>
             </div>
@@ -271,5 +286,32 @@ export default function AccountPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto py-8 px-4">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <Skeleton className="h-8 w-48" />
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-4 w-64" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-20 w-20 rounded-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      }
+    >
+      <AccountContent />
+    </Suspense>
   );
 }
