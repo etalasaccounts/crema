@@ -110,4 +110,5 @@ model Comment {
 enum Source {
   Dropbox
   Local
+  Bunny
 }

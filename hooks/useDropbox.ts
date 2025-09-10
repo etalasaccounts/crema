@@ -121,18 +121,37 @@ export function useDropbox() {
         console.log("Shared link created:", shareResponse.result.url);
 
         // Convert Dropbox shared link to direct download link for videos
-        // Dropbox shared links need to be converted to direct download links for video playback
-        let directUrl = shareResponse.result.url;
-        if (directUrl.includes("dropbox.com/s/")) {
-          // For shared links, we can use the ?dl=1 parameter to get direct download
-          directUrl = directUrl.replace("?dl=0", "?dl=1");
-        } else if (directUrl.includes("www.dropbox.com/scl/")) {
-          // For new Dropbox shared links, use ?raw=1 for direct access
-          directUrl = directUrl.replace("?dl=0", "?raw=1");
+        // Store clean URLs in database instead of processing in video players
+        let cleanUrl = shareResponse.result.url;
+        
+        try {
+          const url = new URL(cleanUrl);
+          
+          if (cleanUrl.includes("dropbox.com/s/")) {
+            // For old style shared links, use dl=1 parameter for direct download
+            url.searchParams.set("dl", "1");
+            cleanUrl = url.toString();
+          } else if (cleanUrl.includes("www.dropbox.com/scl/")) {
+            // For new style shared links, use raw=1 parameter for direct access
+            url.searchParams.set("raw", "1");
+            cleanUrl = url.toString();
+          }
+        } catch (urlError) {
+          console.error("Error processing Dropbox URL:", urlError);
+          // Fallback to simple string replacement if URL parsing fails
+          if (cleanUrl.includes("dropbox.com/s/")) {
+            cleanUrl = cleanUrl.includes("?dl=0") 
+              ? cleanUrl.replace("?dl=0", "?dl=1")
+              : cleanUrl + (cleanUrl.includes("?") ? "&dl=1" : "?dl=1");
+          } else if (cleanUrl.includes("www.dropbox.com/scl/")) {
+            cleanUrl = cleanUrl.includes("?dl=0")
+              ? cleanUrl.replace("?dl=0", "?raw=1")
+              : cleanUrl + (cleanUrl.includes("?") ? "&raw=1" : "?raw=1");
+          }
         }
 
         return {
-          url: directUrl,
+          url: cleanUrl,
           path: response.result.path_display as string,
         };
       } catch (error: any) {

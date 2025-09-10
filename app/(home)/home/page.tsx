@@ -27,27 +27,6 @@ function VideoList() {
   if (!videos || videos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-        <div className="w-16 h-16">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 256 256"
-            fill="none"
-            aria-labelledby="title desc"
-          >
-            <rect
-              x="24"
-              y="64"
-              width="148"
-              height="128"
-              rx="28"
-              stroke="#0F172A"
-              stroke-width="12"
-            />
-            <polygon points="184,100 232,84 232,172 184,156" fill="#0F172A" />
-            <circle cx="64" cy="96" r="10" fill="#EF4444" />
-            <circle cx="96" cy="96" r="6" fill="#0F172A" />
-          </svg>
-        </div>
         <h3 className="text-xl font-semibold mb-2">No videos yet</h3>
         <p className="text-muted-foreground mb-4">
           Start recording to see your videos here.

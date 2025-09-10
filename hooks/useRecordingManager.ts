@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useDropbox } from "@/hooks/useDropbox";
 import { generateThumbnailFromVideoBlob } from "@/lib/video-utils";
+import { uploadVideoToBunny } from "@/lib/upload-video";
 
 export function useRecordingManager() {
   const dispatch = useAppDispatch();
@@ -185,13 +186,13 @@ export function useRecordingManager() {
             let thumbnailUrl: string | undefined;
             if (thumbnailBlob) {
               try {
-                // Upload thumbnail to Bunny.net
-                const thumbnailResponse = await fetch("/api/upload", {
+                // Upload thumbnail to Bunny.net using dedicated thumbnail endpoint
+                const thumbnailResponse = await fetch("/api/upload-thumbnail", {
                   method: "POST",
                   body: (() => {
                     const formData = new FormData();
                     formData.append(
-                      "video",
+                      "thumbnail",
                       thumbnailBlob,
                       `thumbnail-${Date.now()}.jpg`
                     );
@@ -219,7 +220,7 @@ export function useRecordingManager() {
                 workspaceId: user.active_workspace,
                 duration: duration > 0 ? duration : undefined,
                 thumbnailUrl, // Include thumbnail URL if available
-                source: selectedStorage === 'dropbox' ? 'Dropbox' : 'Local',
+                source: selectedStorage === 'dropbox' ? 'Dropbox' : 'Bunny',
               }),
             });
 
@@ -267,6 +268,7 @@ export function useRecordingManager() {
                             videoId: data.video.id,
                             videoUrl: uploadResult.url,
                             thumbnailUrl, // Include thumbnail URL in update
+                            source: "Dropbox", // Dropbox uses Dropbox storage
                           }),
                         });
 
@@ -379,10 +381,67 @@ export function useRecordingManager() {
                 URL.revokeObjectURL(url);
                 }
               } else {
-                // User selected Screenbolt storage - video is already saved in database
-                toast.success("Video saved successfully!", {
-                  description: "Your video is ready for viewing.",
+                // User selected Screenbolt storage - upload to Bunny.net
+                toast.loading("Uploading to Screenbolt...", {
+                  description: "Please wait while your video is being uploaded...",
+                  id: "bunny-upload",
                 });
+
+                try {
+                  // Upload to Bunny.net
+                  const bunnyUrl = await uploadVideoToBunny(blob);
+
+                  if (bunnyUrl) {
+                    // Update video record with Bunny.net URL
+                    const updateResponse = await fetch("/api/videos", {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        videoId: data.video.id,
+                        videoUrl: bunnyUrl,
+                        thumbnailUrl,
+                        source: "Bunny", // Bunny Stream service
+                      }),
+                    });
+
+                    const updateData = await updateResponse.json();
+                    console.log("Database update response:", updateData);
+
+                    if (updateData.success) {
+                      toast.success("Video uploaded successfully!", {
+                        description: "Your video is now available for viewing.",
+                        id: "bunny-upload",
+                      });
+                    } else {
+                      toast.success("Video uploaded to Screenbolt!", {
+                        description: "Note: There was an issue updating the database record.",
+                        id: "bunny-upload",
+                      });
+                      console.warn("Failed to update video record in database:", updateData.error);
+                    }
+                  } else {
+                    throw new Error("Failed to upload video to Bunny.net");
+                  }
+                } catch (uploadError: any) {
+                  console.error("Bunny.net upload error:", uploadError);
+
+                  toast.error("Upload to Screenbolt failed", {
+                    description: "Your video is saved but not uploaded. Please try again.",
+                    id: "bunny-upload",
+                  });
+
+                  // Create a download link for the user as fallback
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `recording-${Date.now()}.webm`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }
               }
             } else {
               throw new Error(

@@ -15,7 +15,7 @@ const createVideoSchema = z.object({
   title: z.string().optional(),
   duration: z.number().positive("Duration must be positive").optional(),
   thumbnailUrl: z.string().url("Invalid thumbnail URL").optional(),
-  source: z.enum(["Dropbox", "Local"]).optional(),
+  source: z.enum(["Dropbox", "Local", "Bunny"]).optional(),
 });
 
 // Schema for updating a video URL
@@ -23,6 +23,7 @@ const updateVideoUrlSchema = z.object({
   videoId: z.string().uuid("Invalid video ID"),
   videoUrl: z.string().url("Invalid video URL"),
   thumbnailUrl: z.string().url("Invalid thumbnail URL").optional(),
+  source: z.enum(["Dropbox", "Local", "Bunny"]).optional(),
 });
 
 export async function GET() {
@@ -38,7 +39,18 @@ export async function GET() {
         { status: 401 }
       );
     }
-    const videos = await getVideos(user.id);
+
+    if (!user.activeWorkspaceId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "No active workspace found",
+        },
+        { status: 400 }
+      );
+    }
+
+    const videos = await getVideos(user.activeWorkspaceId);
     return NextResponse.json(videos);
   } catch (error) {
     return NextResponse.json(
@@ -138,8 +150,8 @@ export async function PUT(request: NextRequest) {
       data: {
         videoUrl: validatedData.videoUrl,
         thumbnailUrl: validatedData.thumbnailUrl || undefined, // Update thumbnail URL if provided
-        // Set source as Dropbox when updating the URL
-        source: "Dropbox",
+        // Use provided source or default to Local for Screenbolt uploads
+        source: validatedData.source || "Local",
       },
       include: {
         user: {

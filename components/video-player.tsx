@@ -12,7 +12,7 @@ export default function VideoPlayer({ videoUrl, className = "" }: VideoPlayerPro
   const [error, setError] = useState<string | null>(null)
   const [processedUrl, setProcessedUrl] = useState<string | null>(null)
 
-  // Process the video URL to ensure it's properly formatted for playback
+  // Use clean URLs directly from database (no processing needed)
   useEffect(() => {
     if (!videoUrl) {
       setError("No video URL provided")
@@ -22,32 +22,14 @@ export default function VideoPlayer({ videoUrl, className = "" }: VideoPlayerPro
 
     try {
       // Validate URL format
-      const url = new URL(videoUrl)
+      new URL(videoUrl)
       
-      // Ensure Dropbox URLs are properly formatted for direct playback
-      if (url.hostname.includes("dropbox.com")) {
-        // For Dropbox shared links, ensure they have the correct parameters
-        if (url.hostname === "www.dropbox.com") {
-          // Convert www.dropbox.com links to dl.dropboxusercontent.com for direct access
-          if (url.pathname.startsWith("/s/")) {
-            // Old style links
-            url.searchParams.set("dl", "1")
-          } else if (url.pathname.startsWith("/scl/")) {
-            // New style links
-            url.searchParams.set("raw", "1")
-          }
-        }
-        
-        setProcessedUrl(url.toString())
-      } else {
-        // For other URLs, use as-is
-        setProcessedUrl(videoUrl)
-      }
-      
+      // URLs are already clean and ready for playback
+      setProcessedUrl(videoUrl)
       setError(null)
     } catch (e) {
       setError("Invalid video URL provided")
-      console.error("Video URL processing error:", e)
+      console.error("Video URL validation error:", e)
       setProcessedUrl(null)
     }
   }, [videoUrl])

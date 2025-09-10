@@ -110,7 +110,7 @@ function Navbar({ className }: { className?: string }) {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="w-full justify-start px-2 hover:bg-white/10 hover:text-neutral-100"
+                        className="w-full justify-start px-2 hover:bg-white/10 hover:text-neutral-100 hidden"
                         onClick={() => router.push("/billing")}
                       >
                         Billing

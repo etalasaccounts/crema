@@ -54,7 +54,7 @@ export function EnhancedVideoPlayer({
   const [processedSrc, setProcessedSrc] = useState<string>(src);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Process the video URL to ensure it's properly formatted for playback
+  // Use clean URLs directly from database (no processing needed)
   useEffect(() => {
     if (!src) {
       setProcessedSrc("");
@@ -63,33 +63,21 @@ export function EnhancedVideoPlayer({
 
     try {
       // Validate URL format
-      const url = new URL(src);
-
-      // Ensure Dropbox URLs are properly formatted for direct playback
-      if (url.hostname.includes("dropbox.com")) {
-        // For Dropbox shared links, ensure they have the correct parameters
-        if (url.hostname === "www.dropbox.com") {
-          // Convert www.dropbox.com links to dl.dropboxusercontent.com for direct access
-          if (url.pathname.startsWith("/s/")) {
-            // Old style links
-            url.searchParams.set("dl", "1");
-          } else if (url.pathname.startsWith("/scl/")) {
-            // New style links
-            url.searchParams.set("raw", "1");
-          }
-        }
-
-        setProcessedSrc(url.toString());
-      } else {
-        // For other URLs, use as-is
-        setProcessedSrc(src);
-      }
+      new URL(src);
+      
+      // URLs are already clean and ready for playback
+      setProcessedSrc(src);
     } catch (e) {
-      console.error("Video URL processing error:", e);
+      console.error("Video URL validation error:", e);
       // If URL is invalid, use as-is
       setProcessedSrc(src);
     }
   }, [src]);
+
+  // Check if this is a Bunny Stream URL
+  const isBunnyStream =
+    processedSrc &&
+    (processedSrc.includes("bunnycdn.com") || processedSrc.includes("b-cdn.net"));
 
   // Check if this is a Google Drive preview URL
   const isGoogleDrivePreview =
@@ -97,11 +85,13 @@ export function EnhancedVideoPlayer({
     processedSrc.includes("drive.google.com/file/d/") &&
     processedSrc.includes("/preview");
 
-  // Check if this is a Dropbox preview URL
+  // Check if this is a Dropbox preview URL (only for URLs without direct download parameters)
   const isDropboxPreview =
     processedSrc &&
     processedSrc.includes("dropbox.com") &&
-    processedSrc.includes("/s/");
+    (processedSrc.includes("/s/") || processedSrc.includes("/scl/")) &&
+    !processedSrc.includes("dl=1") &&
+    !processedSrc.includes("raw=1");
 
   // Handle video loaded metadata
   const handleLoadedMetadata = () => {
