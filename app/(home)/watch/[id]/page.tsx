@@ -6,6 +6,7 @@ import { Loader } from "lucide-react";
 import { ToolbarSection } from "./toolbar";
 import TitleSection from "./info-section";
 import { CommentSection } from "@/app/(home)/watch/[id]/comment-section";
+import { BreadcrumbSEO } from "@/components/seo/breadcrumb-seo";
 import { notFound } from "next/navigation";
 import { use } from "react";
 
@@ -77,6 +78,16 @@ export default function WatchPage({
 
   return (
     <div className="flex flex-col max-w-5xl mx-auto gap-5">
+      {/* Breadcrumb Navigation */}
+      <BreadcrumbSEO
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Videos", href: "/home" },
+          { label: currentVideo?.title || "Video", current: true },
+        ]}
+        className="mb-4 hidden"
+      />
+
       {/* Toolbar */}
       <ToolbarSection
         url={`${

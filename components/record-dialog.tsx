@@ -136,7 +136,7 @@ export function RecordDialog({
   };
 
   // Handle storage selection
-  const handleSelectStorage = (storage: 'screenbolt' | 'dropbox') => {
+  const handleSelectStorage = (storage: "screenbolt" | "dropbox") => {
     console.log("Selected storage:", storage);
     dispatch(setSelectedStorage(storage));
   };
@@ -234,8 +234,8 @@ export function RecordDialog({
                 <Image
                   src={"/assets/logo-white.png"}
                   alt="logo"
-                  width={80}
-                  height={10}
+                  width={128}
+                  height={32}
                 />
               </div>
             </DialogTitle>

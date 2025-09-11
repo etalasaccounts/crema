@@ -83,8 +83,41 @@ function FAQItems() {
 }
 
 export default function HomePage() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Screenbolt",
+    description:
+      "Fast screen recording and video sharing tool for teams and individuals. Record, share and collaborate instantly.",
+    url: "https://Screenbolt.app",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Web Browser",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      description: "Free screen recording tool",
+    },
+    featureList: [
+      "Screen Recording",
+      "Video Sharing",
+      "Instant Collaboration",
+      "Cloud Storage",
+      "Team Workspaces",
+    ],
+    screenshot: "https://Screenbolt.app/assets/demo.webm",
+    author: {
+      "@type": "Organization",
+      name: "Screenbolt",
+    },
+  };
+
   return (
     <div className="relative flex flex-col min-h-screen w-full">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <AnimatedGradientBackground containerStyle={{ zIndex: -50 }} />
 
       <Suspense fallback={<div className="h-16 bg-muted animate-pulse" />}>
@@ -96,12 +129,12 @@ export default function HomePage() {
           SCREEN RECORDER
         </p>
         <div className="max-w-5xl mx-auto text-center space-y-8">
-          <div className="text-5xl sm:text-6xl lg:text-8xl font-bold text-neutral-50 leading-tight">
+          <div className="text-5xl sm:text-6xl lg:text-8xl tracking-wide font-bold text-neutral-50 leading-tight">
             Share your work, even it&apos;s
             <span>
               <ContainerTextFlip
                 words={["undone", "messy", "look bad", "unfinished"]}
-                className="ml-4"
+                className="ml-4 mt-5"
               />
             </span>
           </div>
@@ -362,34 +395,18 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white py-16">
+      <footer className="bg-white py-16 border-t">
         <div className="container mx-auto px-6">
-          {/* Top Section - Logo and Tagline */}
-
-          {/* Bottom Section - Copyright and Social */}
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-gray-200">
-            {/* Left - Copyright and Links */}
-            <div className="flex flex-col lg:flex-row items-center gap-4 text-sm text-gray-600">
-              <span className="font-semibold">SOC 2 Certified</span>
-              <div className="flex items-center gap-4">
-                <span>2025 All rights reserved.</span>
-                <a href="#" className="underline hover:text-blue-600">
-                  Site Map
-                </a>
-                <span>,</span>
-                <a href="#" className="underline hover:text-blue-600">
-                  Privacy
-                </a>
-                <span>, and</span>
-                <a href="#" className="underline hover:text-blue-600">
-                  Terms
-                </a>
-              </div>
+          <div className="flex items-center justify-between gap-8">
+            {/* Brand */}
+            <div className="space-y-1">
+              <h3 className="text-xl font-bold text-gray-900">Screenbolt</h3>
+              <p className="text-gray-600 max-w-sm">
+                Record, share, and collaborate with async video messaging.
+              </p>
             </div>
-            {/* Right - Social Icons */}
-            <div className="flex items-center gap-1">
-              Built with ❤️ by<span className="text-blue-600">Etalas.com</span>
-            </div>{" "}
+
+            <p>&copy; 2024 Screenbolt. All rights reserved.</p>
           </div>
         </div>
       </footer>

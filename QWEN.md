@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a Next.js 15 application named "crema". Based on the dependencies and file structure, it appears to be a video management platform with features for user authentication, workspaces, and video storage. Key technologies include:
+This is a Next.js 15 application named "Screenbolt". Based on the dependencies and file structure, it appears to be a video management platform with features for user authentication, workspaces, and video storage. Key technologies include:
 
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
@@ -10,7 +10,7 @@ This is a Next.js 15 application named "crema". Based on the dependencies and fi
 - **State Management**: Redux Toolkit, React Context (Auth), TanStack Query (React Query)
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: Custom implementation with localStorage and HTTP-only cookies, potentially integrating with NextAuth
-- **Cloud Services**: 
+- **Cloud Services**:
   - Vercel Blob for storage
   - Google Drive API integration
   - Dropbox API integration
