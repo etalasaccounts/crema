@@ -150,3 +150,24 @@ export const useUpdateVideoTitle = () => {
     },
   });
 };
+
+// Hook untuk polling status video sampai URL tersedia
+export const useVideoStatus = (id: string) => {
+  return useQuery({
+    queryKey: ["video-status", id],
+    queryFn: () => fetchVideo(id),
+    enabled: !!id,
+    refetchInterval: (query) => {
+      // Ambil data dari query state
+      const data = query.state.data as Video;
+      // Stop polling jika videoUrl sudah ada dan tidak kosong
+      if (data?.videoUrl && data.videoUrl.trim() !== '') {
+        return false;
+      }
+      // Lanjutkan polling setiap 2 detik jika videoUrl masih kosong/null
+      return 2000;
+    },
+    refetchIntervalInBackground: false, // Hentikan polling saat tab tidak aktif
+    staleTime: 0,
+  });
+};

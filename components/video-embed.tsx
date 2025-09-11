@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Source } from '@/lib/generated/prisma';
 
 interface VideoEmbedProps {
-  videoUrl: string;
+  videoUrl?: string;
   source?: Source;
   title?: string;
   className?: string;
@@ -44,8 +44,9 @@ export function VideoEmbed({
 
   useEffect(() => {
     if (!videoUrl) {
-      setHasError(true);
-      setIsLoading(false);
+      // Jika videoUrl kosong, tetap dalam loading state (video sedang diproses)
+      setIsLoading(true);
+      setHasError(false);
       return;
     }
 
@@ -195,7 +196,9 @@ export function VideoEmbed({
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg z-10">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Loading video...</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {!videoUrl ? 'Processing video...' : 'Loading video...'}
+            </p>
           </div>
         </div>
       )}
