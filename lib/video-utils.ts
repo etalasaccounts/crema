@@ -1,3 +1,36 @@
+/**
+ * Converts Bunny CDN player URL to direct video stream URL
+ * @param playerUrl - Bunny CDN player URL (e.g., https://iframe.mediadelivery.net/embed/{libraryId}/{videoId})
+ * @returns Direct video stream URL or original URL if not a Bunny CDN URL
+ */
+export function getDirectVideoUrl(playerUrl: string): string {
+  try {
+    // Check if it's a Bunny CDN iframe URL
+    if (playerUrl.includes('iframe.mediadelivery.net/embed/')) {
+      // Extract library ID and video ID from iframe URL
+      // Video ID can contain hyphens and alphanumeric characters (UUID format)
+      const match = playerUrl.match(/iframe\.mediadelivery\.net\/embed\/(\d+)\/([\w-]+)/);
+      if (match) {
+        const [, libraryId, videoId] = match;
+        // Convert to direct stream URL using correct Bunny CDN format
+        // Format: https://{pull_zone_url}.b-cdn.net/{video_id}/play_720p.mp4
+        return `https://vz-${libraryId}.b-cdn.net/${videoId}/play_720p.mp4`;
+      }
+    }
+    
+    // Check if it's already a direct video URL
+    if (playerUrl.includes('.b-cdn.net') && playerUrl.includes('.mp4')) {
+      return playerUrl;
+    }
+    
+    // For other URLs, return as-is (fallback)
+    return playerUrl;
+  } catch (error) {
+    console.error('Error converting video URL:', error);
+    return playerUrl;
+  }
+}
+
 export function generateVideoTitleWithTimestamp(): string {
   const baseTitle = `Recording`;
   const now = new Date();

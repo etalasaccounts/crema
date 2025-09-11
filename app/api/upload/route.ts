@@ -123,19 +123,19 @@ async function uploadToStream(buffer: ArrayBuffer, originalFilename: string) {
       );
     }
 
-    // Generate Stream URLs
-    const streamUrl = `https://video.bunnycdn.com/play/${BUNNY_STREAM_LIBRARY_ID}/${videoId}`;
+    // Generate embed-ready URL for database storage
+    const embedUrl = `https://iframe.mediadelivery.net/embed/${BUNNY_STREAM_LIBRARY_ID}/${videoId}`;
     const hlsUrl = `https://${BUNNY_STREAM_CDN_HOSTNAME}/${videoId}/playlist.m3u8`;
     const mp4Url = `https://${BUNNY_STREAM_CDN_HOSTNAME}/${videoId}/play_720p.mp4`;
 
     console.log("Stream upload successful. Video ID:", videoId);
-    console.log("Stream URL:", streamUrl);
+    console.log("Embed URL:", embedUrl);
 
     return NextResponse.json({
       success: true,
-      url: mp4Url, // Use MP4 URL for direct video playback
+      url: embedUrl, // Use embed URL ready for display
       videoId: videoId,
-      streamUrl: streamUrl,
+      embedUrl: embedUrl,
       hlsUrl: hlsUrl,
       mp4Url: mp4Url,
       service: "stream",

@@ -120,38 +120,34 @@ export function useDropbox() {
 
         console.log("Shared link created:", shareResponse.result.url);
 
-        // Convert Dropbox shared link to direct download link for videos
-        // Store clean URLs in database instead of processing in video players
-        let cleanUrl = shareResponse.result.url;
+        // Convert shared link to raw video URL for direct embedding
+        // This allows the video to be embedded using HTML <video> tag
+        let embedUrl = shareResponse.result.url;
         
+        // Convert Dropbox shared link to raw format for video embedding
         try {
-          const url = new URL(cleanUrl);
+          const url = new URL(embedUrl);
           
-          if (cleanUrl.includes("dropbox.com/s/")) {
-            // For old style shared links, use dl=1 parameter for direct download
-            url.searchParams.set("dl", "1");
-            cleanUrl = url.toString();
-          } else if (cleanUrl.includes("www.dropbox.com/scl/")) {
-            // For new style shared links, use raw=1 parameter for direct access
-            url.searchParams.set("raw", "1");
-            cleanUrl = url.toString();
-          }
+          // Remove any existing download parameters
+          url.searchParams.delete("dl");
+          url.searchParams.delete("raw");
+          
+          // Add raw=1 parameter to serve video as raw file for embedding
+          url.searchParams.set("raw", "1");
+          
+          embedUrl = url.toString();
         } catch (urlError) {
           console.error("Error processing Dropbox URL:", urlError);
-          // Fallback to simple string replacement if URL parsing fails
-          if (cleanUrl.includes("dropbox.com/s/")) {
-            cleanUrl = cleanUrl.includes("?dl=0") 
-              ? cleanUrl.replace("?dl=0", "?dl=1")
-              : cleanUrl + (cleanUrl.includes("?") ? "&dl=1" : "?dl=1");
-          } else if (cleanUrl.includes("www.dropbox.com/scl/")) {
-            cleanUrl = cleanUrl.includes("?dl=0")
-              ? cleanUrl.replace("?dl=0", "?raw=1")
-              : cleanUrl + (cleanUrl.includes("?") ? "&raw=1" : "?raw=1");
-          }
+          // Fallback to string replacement
+          embedUrl = embedUrl.replace(/[?&]dl=[01]/g, '').replace(/[?&]raw=[01]/g, '');
+          
+          // Add raw=1 parameter
+          const separator = embedUrl.includes('?') ? '&' : '?';
+          embedUrl = embedUrl + separator + 'raw=1';
         }
 
         return {
-          url: cleanUrl,
+          url: embedUrl, // Return embed-ready URL for database storage
           path: response.result.path_display as string,
         };
       } catch (error: any) {

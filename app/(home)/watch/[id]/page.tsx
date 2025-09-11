@@ -1,7 +1,7 @@
 "use client";
 
 import { useVideoWithComments } from "@/hooks/use-videos";
-import { EnhancedVideoPlayer } from "@/components/enhanced-video-player";
+import { VideoEmbed } from "@/components/video-embed";
 import { ToolbarSection } from "./toolbar";
 import TitleSection from "./info-section";
 import { CommentSection } from "@/app/(home)/watch/[id]/comment-section";
@@ -46,11 +46,13 @@ export default function WatchPage({
       />
 
       {/* Video Player */}
-      <EnhancedVideoPlayer
-        src={video.videoUrl}
-        duration={video.duration ?? undefined}
-        isProcessing={false}
-        videoId={id}
+      <VideoEmbed
+        videoUrl={video.videoUrl}
+        source={video.source}
+        title={video.title}
+        className="w-full aspect-video"
+        controls
+        autoPlay={false}
       />
 
       {/* Title */}
