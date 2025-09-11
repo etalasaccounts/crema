@@ -1,6 +1,6 @@
 "use client";
 
-import { useVideoWithComments, useVideoStatus } from "@/hooks/use-videos";
+import { useVideoStatus } from "@/hooks/use-videos";
 import { VideoEmbed } from "@/components/video-embed";
 import { Loader } from "lucide-react";
 import { ToolbarSection } from "./toolbar";
@@ -15,8 +15,7 @@ export default function WatchPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { data: video, isLoading, error } = useVideoWithComments(id);
-  const { data: videoStatus } = useVideoStatus(id);
+  const { data: currentVideo, isLoading, error } = useVideoStatus(id);
 
   if (error) {
     notFound();
@@ -33,12 +32,9 @@ export default function WatchPage({
     );
   }
 
-  if (!video) {
+  if (!currentVideo) {
     notFound();
   }
-
-  // Gunakan data terbaru dari videoStatus jika tersedia, fallback ke video
-  const currentVideo = videoStatus || video;
   // Video sedang diproses jika videoUrl kosong atau null
   const isVideoProcessing =
     !currentVideo.videoUrl || currentVideo.videoUrl.trim() === "";
@@ -55,8 +51,8 @@ export default function WatchPage({
 
         {/* Video Processing State */}
         <div className="aspect-video bg-muted rounded flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <Loader className="size-8 mr-2 animate-spin [animation-duration:800ms] mx-auto" />
+          <div className="flex flex-col text-center space-y-4">
+            <Loader className="size-8 animate-spin [animation-duration:800ms] mx-auto" />
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">Processing Video...</h3>
               <p className="text-muted-foreground">

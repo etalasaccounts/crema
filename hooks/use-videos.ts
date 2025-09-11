@@ -77,15 +77,6 @@ export const useVideo = (id: string) => {
   });
 };
 
-export const useVideoWithComments = (id: string) => {
-  return useQuery({
-    queryKey: ["video", id, "with-comments"],
-    queryFn: () => fetchVideoWithComments(id),
-    enabled: !!id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
-
 export const useAddVideoView = () => {
   return useMutation({
     mutationFn: async (data: {
@@ -138,8 +129,8 @@ export const useUpdateVideoTitle = () => {
       return response.json();
     },
     onSuccess: (data, variables) => {
-      // Invalidate and refetch the specific video
-      queryClient.invalidateQueries({ queryKey: ["video", variables.videoId] });
+      // Invalidate and refetch the specific video with comments
+      queryClient.invalidateQueries({ queryKey: ["video", variables.videoId, "with-comments"] });
       // Also invalidate the videos list
       queryClient.invalidateQueries({ queryKey: ["videos"] });
       toast("Video title updated successfully");
@@ -151,11 +142,11 @@ export const useUpdateVideoTitle = () => {
   });
 };
 
-// Hook untuk polling status video sampai URL tersedia
+// Hook untuk polling status video sampai URL tersedia (dengan comments)
 export const useVideoStatus = (id: string) => {
   return useQuery({
-    queryKey: ["video-status", id],
-    queryFn: () => fetchVideo(id),
+    queryKey: ["video", id, "with-comments"],
+    queryFn: () => fetchVideoWithComments(id),
     enabled: !!id,
     refetchInterval: (query) => {
       // Ambil data dari query state
