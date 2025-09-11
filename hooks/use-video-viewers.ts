@@ -8,6 +8,7 @@ interface VideoViewer {
     id: string;
     name: string;
     email: string;
+    avatarUrl: string | null;
   } | null;
   viewedAt: string;
 }
@@ -25,11 +26,11 @@ export const useVideoViewers = (videoId: string) => {
     queryKey: ["video-viewers", videoId],
     queryFn: async () => {
       const response = await fetch(`/api/video-views/${videoId}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch video viewers");
       }
-      
+
       return response.json();
     },
     enabled: !!videoId,

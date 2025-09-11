@@ -130,7 +130,9 @@ export const useUpdateVideoTitle = () => {
     },
     onSuccess: (data, variables) => {
       // Invalidate and refetch the specific video with comments
-      queryClient.invalidateQueries({ queryKey: ["video", variables.videoId, "with-comments"] });
+      queryClient.invalidateQueries({
+        queryKey: ["video", variables.videoId, "with-comments"],
+      });
       // Also invalidate the videos list
       queryClient.invalidateQueries({ queryKey: ["videos"] });
       toast("Video title updated successfully");
@@ -152,7 +154,7 @@ export const useVideoStatus = (id: string) => {
       // Ambil data dari query state
       const data = query.state.data as Video;
       // Stop polling jika videoUrl sudah ada dan tidak kosong
-      if (data?.videoUrl && data.videoUrl.trim() !== '') {
+      if (data?.videoUrl && data.videoUrl.trim() !== "") {
         return false;
       }
       // Lanjutkan polling setiap 2 detik jika videoUrl masih kosong/null

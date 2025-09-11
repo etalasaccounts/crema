@@ -10,7 +10,12 @@ import { useVideoViewers } from "@/hooks/use-video-viewers";
 import { getUserInitials } from "@/lib/user-utils";
 
 // Components
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 
 // Interfaces
@@ -138,7 +143,10 @@ export default function InfoSection({ video }: InfoSectionProps) {
         {/* User */}
         <div className="flex gap-3 items-center w-fit">
           <Avatar>
-            <AvatarFallback>{getUserInitials(video.user.name)}</AvatarFallback>
+            <AvatarImage src={video.user.avatarUrl || ""} />
+            <AvatarFallback>
+              {video.user.name?.charAt(0).toUpperCase() || "U"}
+            </AvatarFallback>
           </Avatar>{" "}
           <div className="flex flex-col">
             <p className="font-medium">{video.user.name}</p>
@@ -164,9 +172,20 @@ export default function InfoSection({ video }: InfoSectionProps) {
                     : "?";
 
                   return (
-                    <Avatar key={viewer.id || `anonymous-${index}`}>
-                      <AvatarFallback>{initials}</AvatarFallback>
-                    </Avatar>
+                    <Tooltip key={viewer.id || `anonymous-${index}`}>
+                      <TooltipTrigger>
+                        {" "}
+                        <Avatar className="border-border border">
+                          <AvatarImage src={viewer.user?.avatarUrl || ""} />
+                          <AvatarFallback>
+                            {viewer.user?.name?.charAt(0).toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{viewer.user?.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   );
                 })}
               </div>

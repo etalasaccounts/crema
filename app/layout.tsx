@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { DropboxProvider } from "@/providers/dropbox-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function RootLayout({ children }: any) {
   return (
@@ -14,19 +15,14 @@ export default function RootLayout({ children }: any) {
       <body className="font-sans bg-background">
         <QueryProvider>
           <AuthProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
               <DropboxProvider>
                 <ReduxProvider>
-                  {children}
+                  <TooltipProvider>{children}</TooltipProvider>
 
                   <Toaster />
                   {/* Floating theme toggle button */}
-                  <div className="fixed top-6 right-6 z-50">
+                  <div className="fixed top-6 right-6 z-50 hidden">
                     <ThemeToggle />
                   </div>
                 </ReduxProvider>

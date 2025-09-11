@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import { Loader, CheckCircle, XCircle } from "lucide-react";
 
 type PaymentStatus = "loading" | "success" | "error" | "cancelled";
 
@@ -64,14 +64,18 @@ function BillingStatusContent() {
   const getIcon = () => {
     switch (status) {
       case "loading":
-        return <Loader2 className="h-16 w-16 animate-spin text-blue-500" />;
+        return (
+          <Loader className="h-16 w-16 animate-spin text-blue-500 [animation-duration:1000ms]" />
+        );
       case "success":
         return <CheckCircle className="h-16 w-16 text-green-500" />;
       case "error":
       case "cancelled":
         return <XCircle className="h-16 w-16 text-red-500" />;
       default:
-        return <Loader2 className="h-16 w-16 animate-spin text-blue-500" />;
+        return (
+          <Loader className="h-16 w-16 animate-spin text-blue-500 [animation-duration:1000ms]" />
+        );
     }
   };
 
@@ -172,7 +176,7 @@ export default function BillingStatusPage() {
           <Card className="text-center">
             <CardHeader className="pb-4">
               <div className="flex justify-center mb-4">
-                <Loader2 className="h-16 w-16 animate-spin text-blue-500" />
+                <Loader className="h-16 w-16 animate-spin text-blue-500" />
               </div>
               <CardTitle className="text-2xl">Loading...</CardTitle>
               <CardDescription className="text-lg">

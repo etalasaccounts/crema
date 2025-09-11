@@ -14,6 +14,7 @@ export async function getVideos(workspaceId: string) {
           id: true,
           name: true,
           email: true,
+          avatarUrl: true,
         },
       },
       workspace: {
@@ -42,6 +43,7 @@ export async function getVideo(id: string) {
           id: true,
           name: true,
           email: true,
+          avatarUrl: true,
         },
       },
       workspace: {
@@ -84,6 +86,7 @@ export async function getVideoWithComments(id: string) {
           id: true,
           name: true,
           email: true,
+          avatarUrl: true,
         },
       },
       workspace: {

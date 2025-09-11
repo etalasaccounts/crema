@@ -207,16 +207,24 @@ export const useUser = () => {
 export const useSignup = () => {
   const { login } = useAuthInternal();
   const router = useRouter();
+  const queryClient = useQueryClient();
   
   const signupMutation = useMutation({
     mutationFn: signupUser,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success("Account created successfully!");
       // Store user data in localStorage and context
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("token", data.token);
       login(data.user);
-      router.push("/home");
+      
+      // Invalidate the currentUser query to refetch with new cookie
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      
+      // Small delay to ensure cookie is processed
+      setTimeout(() => {
+        router.push("/home");
+      }, 100);
     },
     onError: (error: Error) => {
       toast.error(error.message || "Signup failed");

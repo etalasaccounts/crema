@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { getUserInitials } from "@/lib/user-utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Camera, Save, Loader2 } from "lucide-react";
+import { Camera, Save, Loader } from "lucide-react";
 import { toast } from "sonner";
 
 function AccountContent() {
@@ -173,7 +173,7 @@ function AccountContent() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Account Settings</h1>
+        <h1 className="text-xl font-semibold">Account Settings</h1>
 
         <Card>
           <CardHeader>
@@ -202,7 +202,7 @@ function AccountContent() {
                   disabled={isUploadingAvatar}
                 >
                   {isUploadingAvatar ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader className="h-4 w-4 animate-spin [animation-duration:1000ms]" />
                   ) : (
                     <Camera className="h-4 w-4" />
                   )}
@@ -260,26 +260,24 @@ function AccountContent() {
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
+            <div className="flex gap-2 justify-end">
+              {" "}
               <Button
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isSaving}
               >
                 Reset
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader className="h-4 w-4 animate-spin [animation-duration:1000ms]" />
+                    Saving...
+                  </>
+                ) : (
+                  <>Save Changes</>
+                )}
               </Button>
             </div>
           </CardContent>

@@ -10,9 +10,9 @@ export async function GET(
 
     if (!videoId) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: "Video ID is required" 
+          error: "Video ID is required",
         },
         { status: 400 }
       );
@@ -29,11 +29,12 @@ export async function GET(
             id: true,
             name: true,
             email: true,
+            avatarUrl: true,
           },
         },
       },
       orderBy: {
-        viewedAt: 'desc',
+        viewedAt: "desc",
       },
     });
 
@@ -42,11 +43,13 @@ export async function GET(
       id: view.id,
       userId: view.userId,
       sessionId: view.sessionId,
-      user: view.user ? {
-        id: view.user.id,
-        name: view.user.name,
-        email: view.user.email,
-      } : null,
+      user: view.user
+        ? {
+            id: view.user.id,
+            name: view.user.name,
+            email: view.user.email,
+          }
+        : null,
       viewedAt: view.viewedAt,
     }));
 
@@ -61,11 +64,11 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error fetching video viewers:", error);
-    
+
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: "Failed to fetch video viewers" 
+        error: "Failed to fetch video viewers",
       },
       { status: 500 }
     );

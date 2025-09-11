@@ -5,7 +5,7 @@ import { useVideos } from "@/hooks/use-videos";
 import Link from "next/link";
 
 // Components
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { VideoThumbnail } from "@/components/video-thumbnail";
 import { getUserInitials } from "@/lib/user-utils";
 import { VideoListActions } from "./video-actions";
@@ -68,6 +68,7 @@ function VideoList() {
             <Link href={`/watch/${video.id}`} className="block">
               <div className="flex gap-2">
                 <Avatar>
+                  <AvatarImage src={video.user.avatarUrl || ""} />
                   <AvatarFallback>
                     {getUserInitials(video.user.name || "Unknown User")}
                   </AvatarFallback>

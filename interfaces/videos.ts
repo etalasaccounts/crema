@@ -27,6 +27,7 @@ export interface Video {
     id: string;
     name: string | null;
     email: string;
+    avatarUrl: string | null;
   };
   workspace: {
     id: string;
