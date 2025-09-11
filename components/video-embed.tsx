@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Source } from '@/lib/generated/prisma';
+import { useState, useEffect } from "react";
+import { Loader } from "lucide-react";
+import { Source } from "@/lib/generated/prisma";
 
 interface VideoEmbedProps {
   videoUrl?: string;
@@ -32,13 +33,15 @@ export function VideoEmbed({
   videoUrl,
   source,
   title,
-  className = '',
+  className = "",
   autoPlay = false,
   muted = false,
   controls = true,
 }: VideoEmbedProps) {
-  const [embedUrl, setEmbedUrl] = useState<string>('');
-  const [embedType, setEmbedType] = useState<'bunny' | 'direct' | 'unknown'>('unknown');
+  const [embedUrl, setEmbedUrl] = useState<string>("");
+  const [embedType, setEmbedType] = useState<"bunny" | "direct" | "unknown">(
+    "unknown"
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -52,33 +55,37 @@ export function VideoEmbed({
 
     try {
       const url = new URL(videoUrl);
-      
+
       // Detect Bunny Stream URLs
-      if (url.hostname.includes('iframe.mediadelivery.net') || 
-          url.hostname.includes('b-cdn.net') ||
-          source === 'Bunny') {
+      if (
+        url.hostname.includes("iframe.mediadelivery.net") ||
+        url.hostname.includes("b-cdn.net") ||
+        source === "Bunny"
+      ) {
         handleBunnyEmbed(videoUrl);
       }
       // Detect Dropbox URLs
-      else if (url.hostname.includes('dropbox.com') || 
-               url.hostname.includes('dropboxusercontent.com') ||
-               source === 'Dropbox') {
+      else if (
+        url.hostname.includes("dropbox.com") ||
+        url.hostname.includes("dropboxusercontent.com") ||
+        source === "Dropbox"
+      ) {
         handleDropboxEmbed(videoUrl);
       }
       // Direct video URLs
       else if (videoUrl.match(/\.(mp4|webm|ogg|mov|avi)$/i)) {
-        setEmbedType('direct');
+        setEmbedType("direct");
         setEmbedUrl(videoUrl);
         setIsLoading(false);
       }
       // Unknown format
       else {
-        setEmbedType('unknown');
+        setEmbedType("unknown");
         setEmbedUrl(videoUrl);
         setIsLoading(false);
       }
     } catch (error) {
-      console.error('Error processing video URL:', error);
+      console.error("Error processing video URL:", error);
       setHasError(true);
       setIsLoading(false);
     }
@@ -87,13 +94,13 @@ export function VideoEmbed({
   const handleBunnyEmbed = (url: string) => {
     try {
       let finalUrl = url;
-      
+
       // If it's already an iframe embed URL, use it directly
-      if (url.includes('iframe.mediadelivery.net/embed/')) {
+      if (url.includes("iframe.mediadelivery.net/embed/")) {
         finalUrl = url;
       }
       // If it's a direct CDN URL, convert to embed URL
-      else if (url.includes('.b-cdn.net')) {
+      else if (url.includes(".b-cdn.net")) {
         // Extract library ID and video ID from CDN URL
         // Format: https://vz-{libraryId}.b-cdn.net/{videoId}/play_720p.mp4
         const cdnMatch = url.match(/vz-(\d+)\.b-cdn\.net\/([a-f0-9-]{36})/);
@@ -102,8 +109,11 @@ export function VideoEmbed({
           finalUrl = `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}`;
         } else {
           // If regex doesn't match, fallback to direct video
-          console.warn('Could not parse Bunny CDN URL, using direct video:', url);
-          setEmbedType('direct');
+          console.warn(
+            "Could not parse Bunny CDN URL, using direct video:",
+            url
+          );
+          setEmbedType("direct");
           setEmbedUrl(url);
           setIsLoading(false);
           return;
@@ -113,7 +123,7 @@ export function VideoEmbed({
       else {
         finalUrl = url;
       }
-      
+
       // Add query parameters for Bunny embed
       const embedUrl = new URL(finalUrl);
       const config: BunnyEmbedConfig = {
@@ -124,18 +134,18 @@ export function VideoEmbed({
         showSpeed: true,
         showHeatmap: false,
       };
-      
+
       Object.entries(config).forEach(([key, value]) => {
         if (value !== undefined) {
           embedUrl.searchParams.set(key, value.toString());
         }
       });
-      
-      setEmbedType('bunny');
+
+      setEmbedType("bunny");
       setEmbedUrl(embedUrl.toString());
       setIsLoading(false);
     } catch (error) {
-      console.error('Error processing Bunny URL:', error);
+      console.error("Error processing Bunny URL:", error);
       setHasError(true);
       setIsLoading(false);
     }
@@ -145,11 +155,11 @@ export function VideoEmbed({
     try {
       // Dropbox URLs with ?raw=1 parameter can be used directly with HTML video tag
       // No need for Dropbox Embedder, treat as direct video
-      setEmbedType('direct');
+      setEmbedType("direct");
       setEmbedUrl(url);
       setIsLoading(false);
     } catch (error) {
-      console.error('Error processing Dropbox URL:', error);
+      console.error("Error processing Dropbox URL:", error);
       setHasError(true);
       setIsLoading(false);
     }
@@ -167,23 +177,35 @@ export function VideoEmbed({
   const handleError = () => {
     setHasError(true);
     setIsLoading(false);
-    console.error('Failed to load video embed:', embedUrl);
+    console.error("Failed to load video embed:", embedUrl);
   };
 
   if (hasError) {
     return (
-      <div className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}>
+      <div
+        className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}
+      >
         <div className="text-center p-8">
           <div className="text-gray-500 dark:text-gray-400 mb-2">
-            <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-12 h-12 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Video tidak dapat dimuat
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-            {title || 'Video'}
+            {title || "Video"}
           </p>
         </div>
       </div>
@@ -195,42 +217,41 @@ export function VideoEmbed({
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg z-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {!videoUrl ? 'Processing video...' : 'Loading video...'}
-            </p>
+            <Loader className="size-8 mr-2 animate-spin [animation-duration:800ms] mx-auto" />
           </div>
         </div>
       )}
-      
+
       {/* Bunny Stream Embed */}
-      {embedType === 'bunny' && (
-        <div className="relative" style={{ paddingTop: '56.25%' }}>
+      {embedType === "bunny" && (
+        <div className="relative" style={{ paddingTop: "56.25%" }}>
           <iframe
             src={embedUrl}
             loading="lazy"
             style={{
-              border: 'none',
-              position: 'absolute',
+              border: "none",
+              position: "absolute",
               top: 0,
-              height: '100%',
-              width: '100%',
+              height: "100%",
+              width: "100%",
             }}
             allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
             allowFullScreen
             onLoad={handleLoad}
             onError={handleError}
-            title={title || 'Bunny Stream Video'}
+            title={title || "Bunny Stream Video"}
           />
         </div>
       )}
-      
+
       {/* Dropbox videos now use direct video embed with ?raw=1 parameter */}
-      
+
       {/* Direct Video Embed */}
-      {embedType === 'direct' && (
+      {embedType === "direct" && (
         <video
-          className={`w-full h-full rounded-lg ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+          className={`w-full h-full rounded-lg ${
+            isLoading ? "opacity-0" : "opacity-100"
+          } transition-opacity duration-300`}
           controls={controls}
           autoPlay={autoPlay}
           muted={muted}
@@ -238,12 +259,12 @@ export function VideoEmbed({
           onLoadStart={handleLoadStart}
           onCanPlay={handleLoad}
           onError={handleError}
-          aria-label={title || 'Video player'}
+          aria-label={title || "Video player"}
         >
           {/* Detect video format from URL and set appropriate type */}
-          {embedUrl.includes('.webm') ? (
+          {embedUrl.includes(".webm") ? (
             <source src={embedUrl} type="video/webm" />
-          ) : embedUrl.includes('.mp4') ? (
+          ) : embedUrl.includes(".mp4") ? (
             <source src={embedUrl} type="video/mp4" />
           ) : (
             // Fallback: try both formats
@@ -257,9 +278,9 @@ export function VideoEmbed({
           </p>
         </video>
       )}
-      
+
       {/* Unknown Format Fallback */}
-      {embedType === 'unknown' && (
+      {embedType === "unknown" && (
         <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg p-8">
           <div className="text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">

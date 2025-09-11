@@ -33,7 +33,7 @@ model User {
   dropboxRefreshToken String?
   dropboxTokenExpiry  DateTime?
   workspaces          Workspace[]
-  activeWorkspace     Workspace?  @relation("UserActiveWorkspace", fields: [activeWorkspaceId], references: [id])
+  activeWorkspace     Workspace?  @relation("UserActiveWorkspace", fields: [activeWorkspaceId], references: [id], onDelete: SetNull)
   videos              Video[]
   videoViews          VideoView[]
   comments            Comment[]
@@ -50,7 +50,7 @@ model Workspace {
   isPremium            Boolean  @default(false)
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  user                 User     @relation(fields: [userId], references: [id])
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   activeUsers          User[]   @relation("UserActiveWorkspace")
   videos               Video[]
 
@@ -68,8 +68,8 @@ model Video {
   source       Source? // Source of the video (Dropbox, Local, etc.)
   userId       String
   workspaceId  String
-  user         User        @relation(fields: [userId], references: [id])
-  workspace    Workspace   @relation(fields: [workspaceId], references: [id])
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   videoViews   VideoView[]
   comments     Comment[]
 
@@ -82,8 +82,8 @@ model VideoView {
   userId    String?
   sessionId String?  // For tracking unauthenticated users
   viewedAt  DateTime @default(now())
-  video     Video    @relation(fields: [videoId], references: [id])
-  user      User?    @relation(fields: [userId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([videoId, userId, sessionId]) // Ensure uniqueness
   @@index([videoId, viewedAt])
@@ -99,9 +99,9 @@ model Comment {
   videoId   String
   parentId  String? // For replies to comments
 
-  user      User    @relation(fields: [userId], references: [id])
-  video     Video   @relation(fields: [videoId], references: [id])
-  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     Video   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[] @relation("CommentReplies")
 
   @@map("comments")

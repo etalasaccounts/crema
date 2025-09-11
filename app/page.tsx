@@ -91,11 +91,11 @@ export default function HomePage() {
         <NavbarTop />
       </Suspense>
       {/* Hero Section */}
-      <div className="w-full px-6 pt-40 pb-12">
+      <div className="w-full flex flex-col px-6 pt-40 pb-12">
+        <p className="font-semibold text-sm tracking-wider text-primary uppercase mx-auto">
+          SCREEN RECORDER
+        </p>
         <div className="max-w-5xl mx-auto text-center space-y-8">
-          <p className="font-semibold text-sm tracking-wider text-primary uppercase">
-            SCREEN RECORDER
-          </p>
           <div className="text-5xl sm:text-6xl lg:text-8xl font-bold text-neutral-50 leading-tight">
             Share your work, even it&apos;s
             <span>
@@ -109,11 +109,10 @@ export default function HomePage() {
             With Screenbolt, the journey matters as much as the
             destination—record it, share it, and keep moving.
           </p>
-
-          <Link href="/signup">
-            <Button className="rounded-full text-2xl p-8">Join Beta</Button>
-          </Link>
         </div>
+        <Link href="/signup" className="mt-8 mx-auto">
+          <Button className="rounded-full text-2xl p-8">Join Beta</Button>
+        </Link>
       </div>
 
       {/* Video Section */}
@@ -133,14 +132,14 @@ export default function HomePage() {
       </div>
 
       {/* Trust Section */}
-      <div className="container mx-auto px-6 pt-16 pb-16 md:pb-32">
+      <div className="container mx-auto px-6 pt-16 pb-16 md:pb-32 hidden">
         <div className="text-center space-y-12">
           <h2 className="uppercase text-neutral-500 font-bold text-sm sm:text-base md:text-lg tracking-wider">
             Used by companies and people working at
           </h2>
 
           {/* Company Logos */}
-          <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-16 opacity-60">
+          <div className=" flex-wrap justify-center items-center gap-8 lg:gap-16 opacity-60 hidden">
             {[
               "360Learning",
               "bambooHR",
@@ -224,7 +223,7 @@ export default function HomePage() {
                 href="/signup"
                 className="inline-flex items-center gap-2 text-blue-600 font-semibold text-lg hover:text-blue-700"
               >
-                Learn More →
+                Get Started →
               </Link>
             </div>
 
@@ -246,11 +245,11 @@ export default function HomePage() {
       {/* CTA Section */}
       <div className="flex w-full px-6 md:pb-16">
         <div className="flex-col sm:flex-row w-full max-w-6xl mx-auto rounded-3xl gap-4 sm:rounded-full text-white dark:bg-black dark:border-white/[0.15] bg-gradient-to-b from-neutral-800 to-neutral-950 shadow-[0_1px_2px_#00000045,0_0_#000,inset_1px_1px_#ffffff5,inset_0_2px_1px_#ffffff50] flex justify-between items-center space-x-2 px-8 md:px-20 py-6">
-          <h2 className="text-white text-2xl sm:text-4xl font-bold">
-            Like what you see so far? Join Beta
+          <h2 className="text-center text-white text-3xl sm:text-4xl font-bold">
+            Like what you see so far?
           </h2>
           <Link href="/signup">
-            <Button className="p-8 text-2xl hidden md:flex rounded-full whitespace-nowrap">
+            <Button className="p-8 text-2xl flex rounded-full whitespace-nowrap">
               Join Demo
             </Button>
           </Link>

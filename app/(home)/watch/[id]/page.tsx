@@ -2,6 +2,7 @@
 
 import { useVideoWithComments, useVideoStatus } from "@/hooks/use-videos";
 import { VideoEmbed } from "@/components/video-embed";
+import { Loader } from "lucide-react";
 import { ToolbarSection } from "./toolbar";
 import TitleSection from "./info-section";
 import { CommentSection } from "@/app/(home)/watch/[id]/comment-section";
@@ -39,7 +40,8 @@ export default function WatchPage({
   // Gunakan data terbaru dari videoStatus jika tersedia, fallback ke video
   const currentVideo = videoStatus || video;
   // Video sedang diproses jika videoUrl kosong atau null
-  const isVideoProcessing = !currentVideo.videoUrl || currentVideo.videoUrl.trim() === '';
+  const isVideoProcessing =
+    !currentVideo.videoUrl || currentVideo.videoUrl.trim() === "";
   if (isVideoProcessing) {
     return (
       <div className="flex flex-col max-w-5xl mx-auto gap-5">
@@ -54,7 +56,7 @@ export default function WatchPage({
         {/* Video Processing State */}
         <div className="aspect-video bg-muted rounded flex items-center justify-center">
           <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <Loader className="size-8 mr-2 animate-spin [animation-duration:800ms] mx-auto" />
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">Processing Video...</h3>
               <p className="text-muted-foreground">
