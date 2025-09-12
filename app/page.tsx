@@ -397,16 +397,30 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-white py-16 border-t">
         <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between gap-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
             {/* Brand */}
-            <div className="space-y-1">
+            <div className="space-y-1 text-center md:text-left">
               <h3 className="text-xl font-bold text-gray-900">Screenbolt</h3>
-              <p className="text-gray-600 max-w-sm">
+              <p className="text-gray-600 max-w-sm mx-auto md:mx-0">
                 Record, share, and collaborate with async video messaging.
               </p>
             </div>
-
-            <p>&copy; 2024 Screenbolt. All rights reserved.</p>
+            <div className="flex flex-col text-center md:text-right">
+              <p className="gap-2">
+                Built with ❤️ by{" "}
+                <span>
+                  <a
+                    href="https://etalas.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Etalas.com
+                  </a>
+                </span>
+              </p>
+              <p>&copy; 2024 Screenbolt. All rights reserved.</p>
+            </div>
           </div>
         </div>
       </footer>

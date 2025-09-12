@@ -135,7 +135,7 @@ const useAuthInternal = () => {
           if (data.user) {
             // Set user data in auth context
             login(data.user);
-            toast.success('Successfully logged in!');
+            // Toast will be shown by the regular login flow
           } else {
             toast.error('Failed to fetch user data');
           }
@@ -242,7 +242,9 @@ export const useLogin = () => {
   const loginMutation = useMutation({
     mutationFn: loginUser,
     onSuccess: async (data) => {
-      toast.success("Login successful!");
+      toast.success("Login successful!", {
+        id: "login-success"
+      });
       // Store user data in localStorage and context
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("token", data.token);
