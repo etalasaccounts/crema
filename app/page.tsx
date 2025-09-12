@@ -418,16 +418,24 @@ export default function HomePage() {
                     Etalas.com
                   </a>
                 </span>
+              </p>{" "}
+              <p className="mt-2">
+                &copy; 2024 Screenbolt. All rights reserved.
               </p>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center md:justify-end mt-2">
-                <Link href="/privacy" className="text-sm text-gray-600 hover:text-blue-600">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center md:justify-end mt-4">
+                <Link
+                  href="/privacy"
+                  className="text-sm text-gray-600 hover:text-blue-600"
+                >
                   Privacy Policy
                 </Link>
-                <Link href="/terms" className="text-sm text-gray-600 hover:text-blue-600">
+                <Link
+                  href="/terms"
+                  className="text-sm text-gray-600 hover:text-blue-600"
+                >
                   Terms of Service
                 </Link>
               </div>
-              <p className="mt-2">&copy; 2024 Screenbolt. All rights reserved.</p>
             </div>
           </div>
         </div>
