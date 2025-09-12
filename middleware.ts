@@ -5,8 +5,9 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get("auth-token")?.value;
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/login", "/signup"];
-  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith("/watch/");
+  const publicRoutes = ["/", "/login", "/signup", "/terms", "/privacy"];
+  const isPublicRoute =
+    publicRoutes.includes(pathname) || pathname.startsWith("/watch/");
 
   // If it's a public route, allow access
   if (isPublicRoute) {
