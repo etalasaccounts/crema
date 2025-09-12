@@ -1,10 +1,13 @@
 import { NavbarTop } from "../navbar";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen bg-white">
-      <NavbarTop />
+      <Suspense fallback={<div className="h-16 bg-white" />}>
+        <NavbarTop />
+      </Suspense>
       <div className="max-w-4xl mx-auto px-4 py-16">
         <div className="prose prose-lg max-w-none">
           <h1 className="text-4xl font-bold text-gray-900 mb-8">

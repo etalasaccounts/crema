@@ -1,7 +1,7 @@
 import "./globals.css";
 
 // Next
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 // Provider
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -16,6 +16,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://screenbolt.app'),
   title: {
     default: "Screenbolt - Fast Screen Recording & Video Sharing",
     template: "%s | Screenbolt",
@@ -72,14 +73,15 @@ export const metadata: Metadata = {
   verification: {
     google: "google-site-verification-code",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
   alternates: {
     canonical: "https://Screenbolt.app",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({ children }: any) {
