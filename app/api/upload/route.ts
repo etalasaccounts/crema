@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { UPLOAD_CONFIG } from "@/lib/chunked-upload";
 
 // Bunny.net Stream Configuration
 const BUNNY_STREAM_API_KEY = process.env.BUNNY_STREAM_API_KEY || "";
@@ -50,6 +51,21 @@ export async function POST(request: NextRequest) {
 
 // Upload to Bunny Stream service (preferred)
 async function uploadToStream(buffer: ArrayBuffer, originalFilename: string) {
+  // Create abort controller for timeout
+  const controller = new AbortController();
+  const fileSizeMB = buffer.byteLength / (1024 * 1024);
+  
+  // Calculate timeout based on file size using config
+   const timeoutMs = Math.max(UPLOAD_CONFIG.MIN_TIMEOUT, fileSizeMB * UPLOAD_CONFIG.TIMEOUT_PER_MB);
+   const timeoutMinutes = Math.round(timeoutMs / (60 * 1000));
+   
+   console.log(`Processing ${fileSizeMB.toFixed(1)}MB file with ${timeoutMinutes} minute timeout`);
+  
+  const timeoutId = setTimeout(() => {
+    console.log('Server upload timeout reached, aborting...');
+    controller.abort();
+  }, timeoutMs);
+
   try {
     // Step 1: Create video object in Stream
     const timestamp = Date.now();
@@ -67,10 +83,12 @@ async function uploadToStream(buffer: ArrayBuffer, originalFilename: string) {
         body: JSON.stringify({
           title: title,
         }),
+        signal: controller.signal,
       }
     );
 
     if (!createVideoResponse.ok) {
+      clearTimeout(timeoutId);
       const errorText = await createVideoResponse.text();
       console.error("Failed to create video object:", errorText);
       return NextResponse.json(
@@ -87,6 +105,7 @@ async function uploadToStream(buffer: ArrayBuffer, originalFilename: string) {
     const videoId = videoData.guid;
 
     if (!videoId) {
+      clearTimeout(timeoutId);
       console.error("No video ID returned from Stream API");
       return NextResponse.json(
         {
@@ -107,10 +126,15 @@ async function uploadToStream(buffer: ArrayBuffer, originalFilename: string) {
           "Content-Type": "video/webm",
         },
         body: new Uint8Array(buffer),
+        signal: controller.signal,
       }
     );
 
+    // Clear timeout on successful upload
+    clearTimeout(timeoutId);
+
     if (!uploadResponse.ok) {
+      clearTimeout(timeoutId);
       const errorText = await uploadResponse.text();
       console.error("Failed to upload video binary:", errorText);
       return NextResponse.json(
@@ -141,7 +165,25 @@ async function uploadToStream(buffer: ArrayBuffer, originalFilename: string) {
       service: "stream",
     });
   } catch (error) {
+    // Clear timeout on error
+    if (typeof timeoutId !== 'undefined') {
+      clearTimeout(timeoutId);
+    }
+    
     console.error("Error during Stream upload:", error);
+    
+    // Handle timeout errors specifically
+    if (error instanceof Error && error.name === 'AbortError') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Upload timeout",
+          details: "File terlalu besar atau koneksi lambat. Coba kompres video atau gunakan koneksi yang lebih stabil.",
+        },
+        { status: 408 } // Request Timeout
+      );
+    }
+    
     return NextResponse.json(
       {
         success: false,

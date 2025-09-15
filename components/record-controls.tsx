@@ -20,6 +20,9 @@ import { useScreenRecording } from "@/hooks/useScreenRecording";
 import { toast } from "sonner";
 import { useRecordingManager } from "@/hooks/useRecordingManager";
 
+// Maximum recording time in seconds (10 minutes = 600 seconds)
+const MAX_RECORDING_TIME = 600;
+
 export function RecordControls() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const dispatch = useAppDispatch();
@@ -128,47 +131,8 @@ export function RecordControls() {
     setTimerInterval(interval);
   }, [timerInterval]);
 
-  // Effect to start timer when recording actually begins
-  useEffect(() => {
-    if (isRecording && !timerInterval && !localIsPaused) {
-      // Start the timer when recording begins (only if not paused)
-      startTimer();
-    } else if (!isRecording && timerInterval) {
-      // Clear timer when recording stops
-      clearInterval(timerInterval);
-      setTimerInterval(null);
-      setRecordingTime(0);
-    }
-  }, [isRecording, timerInterval, localIsPaused, startTimer]);
-
-  // Effect to clear timer on unmount
-  useEffect(() => {
-    return () => {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-      }
-    };
-  }, [timerInterval]);
-
-  // Toggle camera from controls
-  const toggleCamera = async () => {
-    if (cameraActive) {
-      deactivateCamera();
-    } else {
-      await activateCamera();
-    }
-  };
-
-  // Stop the timer
-  const stopTimer = () => {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      setTimerInterval(null);
-    }
-  };
-
   // Handle stopping recording and saving
-  const handleStopRecording = async () => {
+  const handleStopRecording = useCallback(async () => {
     // Capture the recording time before stopping the timer
     const finalRecordingTime = recordingTime;
 
@@ -198,7 +162,54 @@ export function RecordControls() {
     // Use the centralized function to stop recording, passing the timer duration
     const result = await stopRecordingProcess(finalRecordingTime);
     console.log("Stop recording result:", result);
+  }, [recordingTime, cameraActive, deactivateCamera, stopRecordingProcess]);
+
+  // Effect to start timer when recording actually begins
+  useEffect(() => {
+    if (isRecording && !timerInterval && !localIsPaused) {
+      // Start the timer when recording begins (only if not paused)
+      startTimer();
+    } else if (!isRecording && timerInterval) {
+      // Clear timer when recording stops
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+      setRecordingTime(0);
+    }
+
+    // Check if recording has reached maximum time limit
+    if (recordingTime >= MAX_RECORDING_TIME && isRecording) {
+      toast.info("Recording telah mencapai batas maksimal 10 menit dan akan dihentikan otomatis.");
+      handleStopRecording();
+    }
+  }, [isRecording, timerInterval, localIsPaused, startTimer, recordingTime, handleStopRecording]);
+
+  // Effect to clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+    };
+  }, [timerInterval]);
+
+  // Toggle camera from controls
+  const toggleCamera = async () => {
+    if (cameraActive) {
+      deactivateCamera();
+    } else {
+      await activateCamera();
+    }
   };
+
+  // Stop the timer
+  const stopTimer = () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      setTimerInterval(null);
+    }
+  };
+
+
 
   // Handle toggle pause/resume
   const handleTogglePause = async () => {

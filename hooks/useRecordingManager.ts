@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useDropbox } from "@/hooks/useDropbox";
 import { generateThumbnailFromVideoBlob } from "@/lib/video-utils";
-import { uploadVideoToBunny } from "@/lib/upload-video";
+import { uploadVideoToBunny, validateVideoFileSize } from "@/lib/upload-video";
 
 export function useRecordingManager() {
   const dispatch = useAppDispatch();
@@ -153,6 +153,30 @@ export function useRecordingManager() {
             recordingDuration,
             "seconds"
           );
+
+          // Validate file size before proceeding
+          const validation = validateVideoFileSize(blob);
+          if (!validation.valid) {
+            toast.error("File terlalu besar", {
+              description: validation.error,
+            });
+            
+            // Still allow download as fallback
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `recording-${Date.now()}.webm`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Reset state
+            dispatch(setRecording(false));
+            dispatch(setCountdownState("inactive"));
+            dispatch(setStandby(false));
+            return false;
+          }
 
           // Reset recording state
           dispatch(setRecording(false));
@@ -388,8 +412,16 @@ export function useRecordingManager() {
                 });
 
                 try {
-                  // Upload to Bunny.net
-                  const bunnyUrl = await uploadVideoToBunny(blob);
+                  // Upload to Bunny.net with progress tracking
+                  let uploadProgress = 0;
+                  const bunnyUrl = await uploadVideoToBunny(blob, (progress) => {
+                    uploadProgress = progress;
+                    // Update toast with progress
+                    toast.loading(`Uploading to Screenbolt... ${progress}%`, {
+                      description: "Please wait while your video is being uploaded...",
+                      id: "bunny-upload",
+                    });
+                  });
 
                   if (bunnyUrl) {
                     // Update video record with Bunny.net URL
